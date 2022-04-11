@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "ctype.h": "c",
+        "gamma.h": "c",
+        "cmath": "c",
+        "std.h": "c",
+        "math.h": "c"
+    }
+}
