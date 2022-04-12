@@ -314,7 +314,7 @@ class GA_TSP(GeneticAlgorithmBase):
     ranking = ranking.ranking
     selection = selection.selection_tournament_faster
     crossover = crossover.crossover_2point
-    mutation = mutation.mutation_swap
+    mutation = mutation.mutation_totinfo
 
     def run(self, target_,max_iter=None):
         self.max_iter = max_iter or self.max_iter

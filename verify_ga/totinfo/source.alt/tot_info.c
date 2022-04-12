@@ -157,6 +157,7 @@ double x;
 
 	if (--x < 0.0) /* use reflection formula for accuracy */
 	{
+		printf("arrive1");
 		double pix = PI * x;
 
 		return log(pix / sin(pix)) - LGamma(1.0 - x);

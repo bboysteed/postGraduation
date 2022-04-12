@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 
@@ -72,6 +73,22 @@ def mutation_reverse(self):
     return self.Chrom
 
 
+
+
+def mut(individual):
+    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/10))
+    for idx in idxs:
+        if idx <10:
+            individual[idx] = random.randint(0,10)  
+        elif idx>9:
+            individual[idx] = random.randint(-100,100)
+    return individual
+
+def mutation_totinfo(self):
+    for i in range(self.size_pop):
+        if np.random.rand() < self.prob_mut:
+            self.Chrom[i] = mut(self.Chrom[i])
+    return self.Chrom 
 def mutation_swap(self):
     for i in range(self.size_pop):
         if np.random.rand() < self.prob_mut:

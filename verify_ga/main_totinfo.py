@@ -54,7 +54,7 @@ def createPopulation(self):
     # create the population
     print(self.size_pop, self.len_chrom)
     tmp1 = np.random.randint(1,10,[self.size_pop, 10])
-    tmp2 = np.random.randint(0,20,[self.size_pop, 81])
+    tmp2 = np.random.randint(0,50,[self.size_pop, 81])
     self.Chrom = np.concatenate([tmp1,tmp2],axis=1)
 
     # self.allChrom += self.Chrom

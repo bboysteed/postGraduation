@@ -41,7 +41,8 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
     class ReplacementScanf(angr.SimProcedure):
         def run(self, format_string, param0):
             # scanf0 = claripy.BVS('scanf', 24)
-            # # scanf1 = claripy.BVS('scanf1', 32)
+            # self.state.solver.add(scanf0>0,scanf0<10)
+            # scanf1 = claripy.BVS('scanf1', 32)
             # self.state.add_constraints(
             #     claripy.Or(
             #         claripy.And(scanf0>=0,scanf0<99),
@@ -57,7 +58,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
                 self.state.memory.store(scanf0_address,int(passed_num), endness=project.arch.memory_endness)
                 self.state.globals['idx']+=1
             else:
-                num = random.randint(0,20)
+                num = random.randint(-3,30)
                 random_scanf_num.append(num)
                 self.state.memory.store(scanf0_address, num, endness=project.arch.memory_endness)
 
@@ -67,7 +68,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
                 if not self.state.globals['scanf_solutions']:
                     self.state.globals['scanf_solutions'] = [num]
                 else:
-                    self.state.globals['scanf_solutions'] = self.state.globals['scanf_solutions'].append(num)
+                    self.state.globals['scanf_solutions'].append(num)
             # scanf1_address = param1
             # self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
             
@@ -76,8 +77,8 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
         def run(self, address,format_string, param0,param1):
             scanf0 = claripy.BVS('sscanf0', 8)
             scanf1 = claripy.BVS('sscanf1', 8)
-            self.state.solver.add(scanf0>2,scanf0<10)
-            self.state.solver.add(scanf1>2,scanf1<10)
+            self.state.solver.add(scanf0>1,scanf0<3)
+            self.state.solver.add(scanf1>1,scanf1<3)
             scanf0_address = param0
             scanf1_address = param1
             if self.state.globals['concrect'] == 1:
@@ -157,7 +158,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
                 color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
                 new_states.append(state)
         simulation.step()
-        if len(new_states)>10:
+        if len(new_states)>3:
             break
     if simulation.unsat:
         print(simulation.unsat[0].solver.constraints)
@@ -171,23 +172,28 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
         # print(scanf_stored_solution)
         # print(sscanf_stored_solution)
         if sscanf_stored_solution:
-            tmp = map(str, map(new_st.solver.eval, sscanf_stored_solution))
+            tmp = list(map(str, map(new_st.solver.eval, sscanf_stored_solution)))
             sscanf0 = tmp[0]
             sscanf1 = tmp[1]
             print("r&c->",sscanf0,sscanf1)
+        print(random_scanf_num)
+        # random_scanf_num = []
+        print(scanf_stored_solution)
+        # if scanf_stored_solution:
+        #     solution_scanf = ' '.join(map(str, map(new_st.solver.eval, scanf_stored_solution)))
+        #     print(solution_scanf)
+        # print(random_scanf_num)
 
-        if scanf_stored_solution:
-            solution_scanf = ' '.join(map(str, map(new_st.solver.eval, scanf_stored_solution)))
-            print(solution_scanf)
-
+        new_DSE_cases.append([int(sscanf0),int(sscanf1)]+[1]*8+[int(i) for i in random_scanf_num]+[2]*(81-int(sscanf0)*int(sscanf1)))
+        return new_DSE_cases
 if __name__ == "__main__":
     from main_totinfo import Target
     target = Target(num_points_=166,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"totinfo","source.alt"),target_name_="tot_info")   
     cases = [
         [8,3,1,8,9,4,5,7,1,5,4,90,47,41,99,91,46,48,29,61,26,33,6,40,63,1,27,78,73,93,52,2,23,26,44,40,35,65,59,15,79,34,60,99,93,25,61,21,61,24,24,27,79,77,88,92,70,90,12,26,98,14,0,61,43,71,22,72,85,13,60,58,26,23,40,43,92,50,67,2,45,58,29,33,20,23,73,98,37,66,20],
-        # [8,7,2,7,4,2,5,6,3,7,73,34,15,25,95,68,95,86,46,41,82,62,9,57,1,8,10,52,75,30,99,33,18,5,91,11,11,95,1,48,0,10,95,60,72,5,81,1,53,26,98,77,9,14,25,64,98,17,62,93,9,33,31,98,58,8,37,98,25,67,29,8,44,73,23,68,82,63,28,47,58,25,75,27,79,60,96,53,91,40,81],
-        # [4,9,1,9,8,2,2,9,6,4,64,54,72,35,55,37,65,68,44,59,55,96,19,80,84,41,95,15,84,45,65,36,84,23,32,89,52,21,12,73,88,90,30,44,56,70,18,60,21,65,23,98,32,11,54,36,45,91,82,98,0,38,53,75,79,75,37,95,92,46,18,58,71,40,98,67,43,10,88,11,41,18,59,90,40,83,56,62,18,60,23],
-        # [8,1,7,2,1,2,4,4,7,3,99,50,66,46,80,54,47,45,77,77,31,64,49,28,60,5,18,81,50,92,63,19,93,66,98,71,73,77,34,18,74,26,25,24,81,8,56,63,55,17,83,30,27,37,51,62,26,82,96,29,17,94,36,88,67,51,41,33,40,22,14,88,6,14,22,43,69,13,68,46,58,26,12,78,25,22,83,87,28,99,10],
+        [8,7,2,7,4,2,5,6,3,7,73,34,15,25,95,68,95,86,46,41,82,62,9,57,1,8,10,52,75,30,99,33,18,5,91,11,11,95,1,48,0,10,95,60,72,5,81,1,53,26,98,77,9,14,25,64,98,17,62,93,9,33,31,98,58,8,37,98,25,67,29,8,44,73,23,68,82,63,28,47,58,25,75,27,79,60,96,53,91,40,81],
+        [4,9,1,9,8,2,2,9,6,4,64,54,72,35,55,37,65,68,44,59,55,96,19,80,84,41,95,15,84,45,65,36,84,23,32,89,52,21,12,73,88,90,30,44,56,70,18,60,21,65,23,98,32,11,54,36,45,91,82,98,0,38,53,75,79,75,37,95,92,46,18,58,71,40,98,67,43,10,88,11,41,18,59,90,40,83,56,62,18,60,23],
+        [8,1,7,2,1,2,4,4,7,3,99,50,66,46,80,54,47,45,77,77,31,64,49,28,60,5,18,81,50,92,63,19,93,66,98,71,73,77,34,18,74,26,25,24,81,8,56,63,55,17,83,30,27,37,51,62,26,82,96,29,17,94,36,88,67,51,41,33,40,22,14,88,6,14,22,43,69,13,68,46,58,26,12,78,25,22,83,87,28,99,10],
         # [8,3,1,8,9,4,5,6,1,5,4,90,47,41,99,91,46,48,29,61,26,-43,6,40,63,1,3,-94,73,93,52,2,23,26,44,40,35,65,59,15,-34,34,60,99,93,25,-91,21,61,24,24,27,79,77,88,92,70,90,12,26,98,14,0,61,43,71,22,72,85,-22,60,58,26,23,40,43,35,50,67,2,45,58,29,19,20,23,73,98,37,66,20],
         # [8,7,2,7,4,2,5,6,3,7,73,34,15,25,95,68,95,86,46,41,82,62,9,57,1,8,10,52,75,30,99,33,18,5,91,11,11,95,1,48,0,10,95,60,72,5,81,1,53,26,98,77,9,14,25,64,98,17,62,93,9,33,31,98,58,8,37,98,25,67,29,8,44,73,23,68,82,63,28,47,58,25,75,27,79,60,96,53,91,40,81],
         # [4,9,1,9,8,2,6,9,6,4,64,33,-85,35,55,37,83,68,44,59,31,64,49,28,60,5,18,81,50,92,63,19,93,66,98,71,73,77,34,-28,74,26,25,24,81,8,56,63,55,17,83,30,27,37,51,62,26,82,96,29,17,94,36,88,67,80,41,33,40,22,14,88,6,14,22,43,69,13,68,46,58,6,12,78,25,5,83,87,28,99,10],
