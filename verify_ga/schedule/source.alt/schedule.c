@@ -203,12 +203,18 @@ float ratio;
     src_queue = prio_queue[prio];
     dest_queue = prio_queue[prio+1];
     count = src_queue->mem_count;
-
+    // printf("[x]count is:%d",count);
     if (count > 0)
     {
+            // printf("arrive1\n");
+
 	n = (int) (count*ratio + 1);
+    // printf("[x]ratio is:%f\n",ratio);
+    // printf("[x]n:%d\n",n);
 	proc = find_nth(src_queue, n);
+    // printf("arrive1\n");
 	if (proc) {
+        printf("arrive2___\n");
 	    src_queue = del_ele(src_queue, proc);
 	    /* append to appropriate prio queue */
 	    proc->priority = prio;
@@ -282,6 +288,7 @@ void init_prio_queue(prio, num_proc)
 int prio;
 int num_proc;
 {
+    printf("command nums is:%d\n",num_proc);
     List *queue;
     Ele  *proc;
     int i;
@@ -326,6 +333,7 @@ char *argv[];
 	 ((status!=EOF) && status);
 	 status = fscanf(stdin, "%d", &command))
     {
+        printf("command is: %d\n",command);
 	switch(command)
 	{
 	case FINISH:
@@ -344,6 +352,8 @@ char *argv[];
 	case UPGRADE_PRIO:
 	    fscanf(stdin, "%d", &prio);
 	    fscanf(stdin, "%f", &ratio);
+        printf("UPGRADE_PRIO->get priority:%d\n",prio);
+
 	    if (prio > MAXPRIO || prio <= 0) { 
 		fprintf(stdout, "** invalid priority\n");
 		return;
@@ -353,6 +363,7 @@ char *argv[];
 	    break;
 	case NEW_JOB:
 	    fscanf(stdin, "%d", &prio);
+        printf("get priority:%d\n",prio);
 	    if (prio > MAXPRIO || prio <= 0) {
 		fprintf(stdout, "** invalid priority\n");
 		return;

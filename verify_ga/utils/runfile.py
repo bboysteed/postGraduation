@@ -19,8 +19,11 @@ def run_bench_file(input_,target):
     #运行文件
     # print(input_)
     # os.system("{} {}".format(os.path.join(exefilepath,target.target_name),input_.decode()))
-    ret = subprocess.run(args=[os.path.join(exefilepath,target.target_name)], input=input_, timeout=2,check=False)
-    # print(ret)
+    # print(input_)
+    # args=
+    # print(args)
+    subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_[:3]], input=" ".join([str(i) for i in input_[3:]]).encode()+b'\n')
+    
 
 
 def gcovr_save_xml(target_):

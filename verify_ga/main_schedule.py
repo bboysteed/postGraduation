@@ -4,7 +4,7 @@ from re import T
 import numpy as np
 import pyecharts.options as opts
 from pyecharts.charts import Line
-from totinfo_sko.GA import GA_TSP
+from schedule_sko.GA import GA_TSP
 from utils.pycui import *
 from utils.runfile import *
 import os
@@ -30,14 +30,13 @@ class Target:
 
 
 
-target = Target(num_points_=12,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"totinfo","source.alt"),target_name_="tot_info")   
+target = Target(num_points_=12,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"schedule","source.alt"),target_name_="schedule")   
 # target = Target(num_points_=12,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"tcas","source.alt"),target_name_="tcas")   
 
 
 def get_conv_rate(serial):
-    input_data = " ".join([str(i) for i in serial[:2]]) + "\n" + " ".join([str(i) for i in serial[10:10+serial[0]*serial[1] ] ] ) + "\n"
-    cui.info("a case is: {}".format(input_data.encode()))
-    run_bench_file(input_=input_data.encode(),target = target)  # 运行程序
+    # input_data = " ".join([str(i) for i in serial])
+    run_bench_file(input_=list(serial),target=target)  # 运行程序
     gcovr_save_xml(target_=target)
     covr_rate = parse_xml_and_get_rate(target_=target)
     return covr_rate   
@@ -54,8 +53,8 @@ def println(chrom):
 def createPopulation(self):
     # create the population
     print(self.size_pop, self.len_chrom)
-    tmp1 = np.random.randint(1,10,[self.size_pop, 10])
-    tmp2 = np.random.randint(0,50,[self.size_pop, 81])
+    tmp1 = np.random.randint(0,10,[self.size_pop, 3])
+    tmp2 = np.random.randint(1,7,[self.size_pop, 100])
     self.Chrom = np.concatenate([tmp1,tmp2],axis=1)
 
     # self.allChrom += self.Chrom
