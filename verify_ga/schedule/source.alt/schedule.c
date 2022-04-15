@@ -288,7 +288,7 @@ void init_prio_queue(prio, num_proc)
 int prio;
 int num_proc;
 {
-    printf("command nums is:%d\n",num_proc);
+    // printf("command nums is:%d\n",num_proc);
     List *queue;
     Ele  *proc;
     int i;

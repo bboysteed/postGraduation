@@ -21,7 +21,7 @@ def run_bench_file(input_,target):
     # os.system("{} {}".format(os.path.join(exefilepath,target.target_name),input_.decode()))
     # print(input_)
     # args=
-    # print(args)
+    color.info(f'input a case :{" ".join([str(i) for i in input_])}')
     subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_[:3]], input=" ".join([str(i) for i in input_[3:]]).encode()+b'\n')
     
 

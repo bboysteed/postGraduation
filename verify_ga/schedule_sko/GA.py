@@ -10,7 +10,7 @@ from .tools import func_transformer
 from abc import ABCMeta, abstractmethod
 from .operators import crossover, mutation, ranking, selection
 from utils.pycui import *
-import DSE_totinfo
+import DSE_schedule
 color = pycui()
 
 
@@ -297,6 +297,7 @@ class GA_TSP(GeneticAlgorithmBase):
         self.has_constraint = False
         self.len_chrom = self.n_dim
         self.no_gain_count = 0
+        self.all_old_chrom = []
         crtp(self)
 
 
@@ -314,12 +315,13 @@ class GA_TSP(GeneticAlgorithmBase):
     ranking = ranking.ranking
     selection = selection.selection_tournament_faster
     crossover = crossover.crossover_2point
-    mutation = mutation.mutation_swap
+    mutation = mutation.mutation_schedule
 
-    def run(self, target_,max_iter=None):
+    def run(self, target_,visited_addr,max_iter=None):
         self.max_iter = max_iter or self.max_iter
         for i in range(self.max_iter):
             Chrom_old = self.Chrom.copy()
+            self.all_old_chrom += Chrom_old.tolist()
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()
@@ -328,7 +330,7 @@ class GA_TSP(GeneticAlgorithmBase):
             self.mutation()
 
             # put parent and offspring together and select the best size_pop number of population
-            self.Chrom = np.concatenate([Chrom_old, self.Chrom], axis=0)
+            # self.Chrom = np.concatenate([Chrom_old, self.Chrom], axis=0)
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()
@@ -346,12 +348,13 @@ class GA_TSP(GeneticAlgorithmBase):
                 if self.generation_best_Y[-1] == self.generation_best_Y[-2]:
                     self.no_gain_count+=1
             print("all case legth->",len(self.Chrom))
-            # if self.no_gain_count > 1:
-            #     color.error("GA stucked,call DSE……")
-            #     new_cases = DSE_totinfo.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_)
-            #     self.Chrom = np.concatenate([self.Chrom,np.array(new_cases)],axis=0)
-            #     self.no_gain_count = 0
-            
+            if self.no_gain_count > 1:
+                color.error(f"at generation {i},GA stucked,call DSE……")
+                new_cases = DSE_schedule.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr)
+                self.Chrom = np.concatenate([self.Chrom,np.array(new_cases)],axis=0)
+                self.no_gain_count = 0
+                print(self.Chrom)
+                # exit(0)
             #add DSE to fit `checksum()` 
             # if 32 > i > 30:
             #     global_best_index = np.array(self.generation_best_Y).argmin()

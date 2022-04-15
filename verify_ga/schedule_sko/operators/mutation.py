@@ -84,11 +84,31 @@ def mut(individual):
             individual[idx] = random.randint(-100,100)
     return individual
 
+
+def mut_schedule(individual):
+    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/20))
+    for idx in idxs:
+        print("&&&&&&&&&&&&&&&&",individual[idx])
+        if  0<individual[idx]<1:
+            print("+++++++++++++++++++++++++++++++++++++++++++++++")
+            individual[idx] = random.random()  
+        else:
+            print("++++++++++++++++++++++----------------+++++++++++++++++++++++++")
+            individual[idx] = random.randint(1,7)
+    return individual
+
 def mutation_totinfo(self):
     for i in range(self.size_pop):
         if np.random.rand() < self.prob_mut:
             self.Chrom[i] = mut(self.Chrom[i])
     return self.Chrom 
+
+def mutation_schedule(self):
+    for i in range(self.size_pop):
+        if np.random.rand() < self.prob_mut:
+            self.Chrom[i] = mut_schedule(self.Chrom[i])
+    return self.Chrom
+
 def mutation_swap(self):
     for i in range(self.size_pop):
         if np.random.rand() < self.prob_mut:

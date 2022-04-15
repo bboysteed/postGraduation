@@ -30,12 +30,11 @@ class Target:
 
 
 
-target = Target(num_points_=12,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"schedule","source.alt"),target_name_="schedule")   
+target = Target(num_points_=23,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"schedule","source.alt"),target_name_="schedule")   
 # target = Target(num_points_=12,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"tcas","source.alt"),target_name_="tcas")   
 
 
 def get_conv_rate(serial):
-    # input_data = " ".join([str(i) for i in serial])
     run_bench_file(input_=list(serial),target=target)  # 运行程序
     gcovr_save_xml(target_=target)
     covr_rate = parse_xml_and_get_rate(target_=target)
@@ -54,7 +53,7 @@ def createPopulation(self):
     # create the population
     print(self.size_pop, self.len_chrom)
     tmp1 = np.random.randint(0,10,[self.size_pop, 3])
-    tmp2 = np.random.randint(1,7,[self.size_pop, 100])
+    tmp2 = np.random.randint(1,8,[self.size_pop, 20])
     self.Chrom = np.concatenate([tmp1,tmp2],axis=1)
 
     # self.allChrom += self.Chrom
@@ -62,10 +61,12 @@ def createPopulation(self):
 #gcovr -r . --html --html-details -o coverage.html
 def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=5, prob_mut=0.5)
-    best_points, best_distance = ga_tsp.run(target_ = target)
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=20, prob_mut=0.5)
+    visited_state_addr = []
+    best_points, best_distance = ga_tsp.run(target_ = target,visited_addr = visited_state_addr)
     print(best_points,best_distance)
-    println(ga_tsp.Chrom)
+    println(ga_tsp.all_old_chrom)
+    print(len(ga_tsp.all_old_chrom))
 
     y_data = ga_tsp.generation_best_Y
     x_data = np.linspace(1,len(y_data),len(y_data))
