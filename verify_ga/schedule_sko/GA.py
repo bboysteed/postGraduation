@@ -321,7 +321,7 @@ class GA_TSP(GeneticAlgorithmBase):
         self.max_iter = max_iter or self.max_iter
         for i in range(self.max_iter):
             Chrom_old = self.Chrom.copy()
-            self.all_old_chrom += Chrom_old.tolist()
+            self.all_old_chrom += Chrom_old.tolist() #二维列表可以存储长度不一的测试用例
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()
@@ -350,21 +350,22 @@ class GA_TSP(GeneticAlgorithmBase):
             print("all case legth->",len(self.Chrom))
             if self.no_gain_count > 1:
                 color.error(f"at generation {i},GA stucked,call DSE……")
-                new_cases = DSE_schedule.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr)
-                self.Chrom = np.concatenate([self.Chrom,np.array(new_cases)],axis=0)
+                #得到一个新的测试用例
+                new_case = DSE_schedule.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr)
+                from utils import runfile
+                #直接运行测试用例
+                print(new_case)
+                if not new_case:
+                    continue
+                runfile.run_bench_file(input_=list(new_case),target=target_)
+                #加入到all old存储
+                self.all_old_chrom.append(new_case)
+                #截断加入chrom中去变异
+                self.Chrom = np.row_stack([self.Chrom,new_case[:23]])
                 self.no_gain_count = 0
-                print(self.Chrom)
+            color.info(f"at generation{i},pop_size is:{len(self.Chrom)},all pop_size is{len(self.all_old_chrom)}")
                 # exit(0)
-            #add DSE to fit `checksum()` 
-            # if 32 > i > 30:
-            #     global_best_index = np.array(self.generation_best_Y).argmin()
-            #     best_x = self.generation_best_X[global_best_index]
-            #     best_x[6]=2
-            #     print(type(self.Chrom),self.Chrom)
-            #     self.Chrom = np.concatenate([self.Chrom, [best_x]],axis=0)
-            #     print(self.Chrom)
-                # exit(0)
-                # self.Chrom.append(best_x)
+
 
 
         global_best_index = np.array(self.generation_best_Y).argmin()

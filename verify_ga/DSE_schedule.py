@@ -65,7 +65,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                 self.state.globals['idx']+=1
                 
             else:
-                
+                color.error(f"长度--{len(self.state.globals['scanf_solutions'])}")
                 num = 0
                 # color.error(format_string_ptr)
 
@@ -75,6 +75,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
 
                 if format_str == b'%d':
                     num = random.randint(1,3)
+                    # num = claripy.BVS("num")
                     self.state.memory.store(scanf0_address, claripy.BVV(num,8))
                 random_scanf_num.append(num)
 
@@ -82,6 +83,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                     self.state.globals['scanf_solutions'] = [num]
                 else:
                     self.state.globals['scanf_solutions'].append(num)
+                
             # scanf1_address = param1
             # self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
             
@@ -141,8 +143,9 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                 # print("active state input:  ",state.posix.dumps(0))
                 # print("active state output:  ",state.posix.dumps(1))
             #  print(simulation.stashes)
-            color.warning(f"visited addr length is:{len(visited_state_addr)}")
             simulation.step()
+        color.warning(f"visited addr length is:{len(visited_state_addr)}")
+
     color.success(f"DSE store all visited state address:{visited_state_addr}")
     color.success(f"all visited state address length is:{len(visited_state_addr)}")
     # # print(simulation.deadended[0].posix.dumps(0))
@@ -167,17 +170,26 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
     new_states = []
     while simulation.active:
         for state in simulation.active:
+            # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
+            def dd(state):
+                color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
+                return len(state.globals['scanf_solutions']) > 100
+            simulation.drop(filter_func=dd)
             print("active state output:  ",state.posix.dumps(1))
             if state.addr not in visited_state_addr:
                 color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
                 new_states.append(state)
+                visited_state_addr.append(state.addr)
 
         simulation.step()
-        if len(new_states)>1:
+        if len(new_states)>0:
             break
     if simulation.unsat:
         print(simulation.unsat[0].solver.constraints)
-    
+    if not new_states:
+        color.warning("no more state found!!!")
+        import time
+        time.sleep(3)
     new_DSE_cases = []
     for new_st in new_states:
         # print("active state input:  ",new_st.posix.dumps(0))
@@ -207,12 +219,12 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         nc = v1v2v3 + random_scanf_num
         if len(nc)<23:
             nc += list(np.random.randint(1,8,(23-len(nc))))
-        if len(nc) > 23:
-            nc = nc[:23]
+        # if len(nc) > 23:
+        #     nc = nc[:23]  #4.15此处不能截断j
         print(nc)
-        new_DSE_cases.append(nc)
+        new_DSE_cases+=nc
         
-        return new_DSE_cases
+    return new_DSE_cases
     # def tmp(state):
     #     color.info(f"active length is:{len(simulation.active)}")
     #     color.info(f"constraint length is:{len(state.solver.constraints)}")
