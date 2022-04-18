@@ -76,12 +76,12 @@ def mutation_reverse(self):
 
 
 def mut(individual):
-    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/10))
+    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/20))
     for idx in idxs:
         if idx <10:
             individual[idx] = random.randint(0,10)  
         elif idx>9:
-            individual[idx] = random.randint(-100,100)
+            individual[idx] = random.randint(-3,30)
     return individual
 
 def mutation_totinfo(self):

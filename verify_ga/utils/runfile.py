@@ -6,13 +6,15 @@ color = pycui()
 
 def run_bench_file(input_,target):
     exefilepath = target.target_exe_path
-    color.info(f'input a case :{" ".join([str(i) for i in input_])}')
 
     if target.target_name == "tcas":
+        color.info(f'input a case :{" ".join([str(i) for i in input_])}')
         subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
-    elif target.target_name == "totinfo":
-        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
-    elif target.name == "schedule":
+    elif target.target_name == "tot_info":
+        input_data = " ".join([str(i) for i in input_[:2]]) + "\n" + " ".join([str(i) for i in input_[10:10+input_[0]*input_[1] ] ] ) + "\n"
+        color.info("a case is: {}".format(input_data.encode()))
+        subprocess.run(args=[os.path.join(exefilepath,target.target_name)],input=input_data.encode(),check=False)
+    elif target.target_name == "schedule":
         subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
     elif target.target_name == "schedule2":
         subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)

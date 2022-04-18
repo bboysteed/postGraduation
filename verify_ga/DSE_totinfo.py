@@ -5,11 +5,8 @@ import datetime
 from sympy import im
 from utils.pycui import pycui
 import angr
-import subprocess
 import os
-from angr import SimFileStream
 import claripy
-import itertools
 import random
 import logging
 
@@ -35,7 +32,7 @@ def tmp(state):
     out = state.posix.dumps(1)
     return b'total 2info =' in out
 
-def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
+def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_addr):
     path_to_binary = os.path.join(target.target_exe_path,target.target_name)
     project = angr.Project(path_to_binary)
     class ReplacementScanf(angr.SimProcedure):
@@ -54,11 +51,11 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
 
             if self.state.globals['concrect'] == 1:
                 passed_num = self.state.globals['case'][self.state.globals['idx']]
-                color.info(f"[x] scanf get num: {passed_num}")
+                # color.info(f"[x] scanf get num: {passed_num}")
                 self.state.memory.store(scanf0_address,int(passed_num), endness=project.arch.memory_endness)
                 self.state.globals['idx']+=1
             else:
-                num = random.randint(-3,30)
+                num = random.randint(-10,30)
                 random_scanf_num.append(num)
                 self.state.memory.store(scanf0_address, num, endness=project.arch.memory_endness)
 
@@ -85,11 +82,11 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
                 print(self.state.globals['case'])
                 print(self.state.globals['idx'])
                 passed_num1 = self.state.globals['case'][self.state.globals['idx']]
-                color.info(f"[x]sscanf get num1:{passed_num1}")
+                # color.info(f"[x]sscanf get num1:{passed_num1}")
                 self.state.memory.store(scanf0_address,int(passed_num1), endness=project.arch.memory_endness)
                 self.state.globals['idx']+=1
                 passed_num2 = self.state.globals['case'][self.state.globals['idx']]
-                color.info(f"[x]sscanf get num2:{passed_num2}")
+                # color.info(f"[x]sscanf get num2:{passed_num2}")
                 self.state.memory.store(scanf1_address,int(passed_num2), endness=project.arch.memory_endness)
                 self.state.globals['idx']+=1
             else:
@@ -120,7 +117,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
 
     cases = format_cases(pass_cases_)
     print(cases)
-    visited_state_addr = []
+    visited_state_addr = visited_addr
     visited_state = []
     for case in cases:
         initial_state = project.factory.entry_state()
@@ -157,18 +154,23 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
             if state.addr not in visited_state_addr:
                 color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
                 new_states.append(state)
+            print("约束长度：",len(state.solver.constraints))
         simulation.step()
-        if len(new_states)>3:
+        print("活跃长度：",len(simulation.active))
+
+        if len(new_states)>0:
             break
     if simulation.unsat:
         print(simulation.unsat[0].solver.constraints)
 
+    if not new_states:
+        color.warning("no more new state found!")
     new_DSE_cases = []
     for new_st in new_states:
         # print("active state input:  ",new_st.posix.dumps(0))
         print("active state output:  ",new_st.posix.dumps(1))
         sscanf_stored_solution = new_st.globals['sscanf_solutions']
-        scanf_stored_solution = new_st.globals['scanf_solutions']
+        # scanf_stored_solution = new_st.globals['scanf_solutions']
         # print(scanf_stored_solution)
         # print(sscanf_stored_solution)
         if sscanf_stored_solution:
@@ -178,14 +180,17 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
             print("r&c->",sscanf0,sscanf1)
         print(random_scanf_num)
         # random_scanf_num = []
-        print(scanf_stored_solution)
+        # print(scanf_stored_solution)
         # if scanf_stored_solution:
         #     solution_scanf = ' '.join(map(str, map(new_st.solver.eval, scanf_stored_solution)))
         #     print(solution_scanf)
         # print(random_scanf_num)
 
-        new_DSE_cases.append([int(sscanf0),int(sscanf1)]+[1]*8+[int(i) for i in random_scanf_num]+[2]*(81-int(sscanf0)*int(sscanf1)))
-        return new_DSE_cases
+        new_DSE_cases.append([int(sscanf0),int(sscanf1)]+[1]*8+[int(i) for i in random_scanf_num]+[2]*(81-len(random_scanf_num)))
+    print("new_DSE_cases:",new_DSE_cases)    
+    return new_DSE_cases
+
+
 if __name__ == "__main__":
     from main_totinfo import Target
     target = Target(num_points_=166,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"totinfo","source.alt"),target_name_="tot_info")   

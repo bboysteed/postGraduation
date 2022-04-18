@@ -1,6 +1,3 @@
-#!/home/steed/.virtualenvs/ga_env/bin/python
-from mimetypes import init
-from re import T
 import numpy as np
 import pyecharts.options as opts
 from pyecharts.charts import Line
@@ -35,9 +32,8 @@ target = Target(num_points_=12,exe_path_=os.path.join(os.path.abspath(os.path.di
 
 
 def get_conv_rate(serial):
-    input_data = " ".join([str(i) for i in serial[:2]]) + "\n" + " ".join([str(i) for i in serial[10:10+serial[0]*serial[1] ] ] ) + "\n"
-    cui.info("a case is: {}".format(input_data.encode()))
-    run_bench_file(input_=input_data.encode(),target = target)  # 运行程序
+
+    run_bench_file(input_=serial,target = target)  # 运行程序
     gcovr_save_xml(target_=target)
     covr_rate = parse_xml_and_get_rate(target_=target)
     return covr_rate   
@@ -50,12 +46,13 @@ def println(chrom):
     for item in chrom:
         print("[",",".join(["\"{}\"".format(str(i)) for i in item]),"],")
     print("]")
-# %% do GA
+
+
 def createPopulation(self):
     # create the population
     print(self.size_pop, self.len_chrom)
     tmp1 = np.random.randint(1,10,[self.size_pop, 10])
-    tmp2 = np.random.randint(0,50,[self.size_pop, 81])
+    tmp2 = np.random.randint(1,50,[self.size_pop, 81])
     self.Chrom = np.concatenate([tmp1,tmp2],axis=1)
 
     # self.allChrom += self.Chrom
@@ -63,12 +60,13 @@ def createPopulation(self):
 #gcovr -r . --html --html-details -o coverage.html
 def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=10, prob_mut=0.5)
-    best_points, best_distance = ga_tsp.run(target_ = target)
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=12, prob_mut=0.5)
+    visited_addr = []
+    best_points, best_distance = ga_tsp.run(target_ = target,visited_addr = visited_addr)
     print(best_points,best_distance)
     println(ga_tsp.Chrom)
 
-    y_data = ga_tsp.generation_best_Y
+    y_data = [round(float(n),2) for n in ga_tsp.generation_best_Y]
     x_data = np.linspace(1,len(y_data),len(y_data))
 
 
@@ -91,7 +89,7 @@ def main():
             is_symbol_show=True,
             label_opts=opts.LabelOpts(is_show=True),
         )
-        .render(os.path.join(target.target_exe_path,"results.html"))
+        .render(os.path.join(target.target_exe_path,f"results_{target.target_name}.html"))
     )
 
 if __name__ == '__main__':
