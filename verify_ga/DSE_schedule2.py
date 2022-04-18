@@ -1,3 +1,4 @@
+from calendar import c
 import random
 from re import T
 import datetime
@@ -89,33 +90,83 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
             
             return 1
     class ReplacementSscanf(angr.SimProcedure):
-        def run(self, address,format_string, param0,param1):
-            scanf0 = claripy.BVS('sscanf0', 8)
-            scanf1 = claripy.BVS('sscanf1', 8)
-            self.state.solver.add(scanf0>1,scanf0<3)
-            self.state.solver.add(scanf1>1,scanf1<3)
-            scanf0_address = param0
-            scanf1_address = param1
+        def run(self, ptr,format_string_ptr, param0,param1):
+            # simulation.drop(lambda x:x.globals['idx']>=23)
+            a = self.state.memory.load(format_string_ptr, 30)
+            color.warning(f"split before format_str is {self.state.solver.eval(a,cast_to=bytes)}")
+            format_str = self.state.solver.eval(a,cast_to=bytes).split(b'\x00')[0]
+            color.warning(f"format_str is {format_str}")
             if self.state.globals['concrect'] == 1:
-                print(self.state.globals['case'])
-                print(self.state.globals['idx'])
-                passed_num1 = self.state.globals['case'][self.state.globals['idx']]
-                color.info(f"[x]sscanf get num1:{passed_num1}")
-                self.state.memory.store(scanf0_address,int(passed_num1), endness=project.arch.memory_endness)
-                self.state.globals['idx']+=1
-                passed_num2 = self.state.globals['case'][self.state.globals['idx']]
-                color.info(f"[x]sscanf get num2:{passed_num2}")
-                self.state.memory.store(scanf1_address,int(passed_num2), endness=project.arch.memory_endness)
-                self.state.globals['idx']+=1
+                color.info("进入具体执行...")
+                if b"%d" in format_str and b"%f" not in format_str:
+                    num = self.state.globals['case'][self.state.globals['idx']]
+                    color.warning(f"num is:{num}")
+                    self.state.globals['idx']+=1
+                    self.state.memory.store(param0,int(num),endness=project.arch.memory_endness)
+                    return 1
+                elif b"%f" in format_str and b"%d" not in format_str:
+                    num = self.state.globals['case'][self.state.globals['idx']]
+                    color.warning(f"num is:{num}")
+
+                    self.state.globals['idx']+=1                   
+                    self.state.memory.store(param0,claripy.FPV(float(num),sort=self.state.solver.fp.FSORT_FLOAT))
+                    return 1
+                elif b"%d%f" in format_str:
+                    int_num = self.state.globals['case'][self.state.globals['idx']]
+                    color.warning(f"int_num is:{int_num}")
+                    self.state.globals['idx']+=1
+                    float_num = self.state.globals['case'][self.state.globals['idx']]
+                    color.warning(f"float_num is:{float_num}")
+                    self.state.globals['idx']+=1
+                    self.state.memory.store(param0,int(int_num))
+                    self.state.memory.store(param1,claripy.FPV(float(float_num),sort=self.state.solver.fp.FSORT_FLOAT))
+
+                
             else:
-                self.state.memory.store(scanf0_address,scanf0, endness=project.arch.memory_endness)
-                self.state.memory.store(scanf1_address,scanf1, endness=project.arch.memory_endness)
-                self.state.globals['sscanf_solutions'] = [scanf0,scanf1]
-            return 2
-    
-    project.hook_symbol('__isoc99_fscanf', ReplacementFscanf())
-    # project.hook_symbol('__isoc99_sscanf', ReplacementSscanf())
-    # project.hook_symbol('fgets', ReplacementFgets())
+                if b"%d" in format_str and b"%f" not in format_str:
+                    num = int(random.randint(1,3))
+                    # num = 1
+                    color.error(f"num is {num}")
+                    random_scanf_num.append(num)
+                    self.state.memory.store(param0,int(num),endness=project.arch.memory_endness)
+
+                    return 1
+                elif b"%f" in format_str and b"%d" not in format_str:
+                    num = random.random()
+                    random_scanf_num.append(num)
+
+                    self.state.memory.store(param0,claripy.FPV(num,sort=self.state.solver.fp.FSORT_FLOAT))
+                    return 1
+                elif b"%d%f" in format_str:
+                    int_num = random.randint(1,3)
+                    float_num = random.random()
+                    random_scanf_num.append(int_num)
+                    random_scanf_num.append(float_num)
+                    # store_nums = [int_num,float_num]
+                    self.state.memory.store(param0,int(int_num),endness=project.arch.memory_endness)
+                    self.state.memory.store(param1,claripy.FPV(float_num,sort=self.state.solver.fp.FSORT_FLOAT))
+                    return 2
+            # color.warning(f"format_str is {format_str}")
+            # exit(0)
+            # return 2
+    class ReplacementFgets(angr.SimProcedure):
+    # Finish the parameters to the scanf function. Hint: 'scanf("%u %u", ...)'.
+    # (!)
+        def run(self, address,size,file_dp):
+            # scanf0 = claripy.BVS('scanf0', 8)
+            # scanf1 = claripy.BVS('scanf1', 8)
+            # self.state.solver.add(scanf0>48,scanf0<58)
+            # self.state.solver.add(scanf1>48,scanf1<58)
+            # scanf0_address = param0
+            self.state.memory.store(address, b'xxxxx\n', endness=project.arch.memory_endness)
+            # self.state.memory.store(address, scanf0.concat(b' ',scanf1,b'\n'), endness=project.arch.memory_endness)
+            # scanf1_address = param1
+            # self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
+
+            return 1
+    # project.hook_symbol('__isoc99_fscanf', ReplacementFscanf())
+    project.hook_symbol('__isoc99_sscanf', ReplacementSscanf())
+    project.hook_symbol('fgets', ReplacementFgets())
 
     
 
@@ -123,7 +174,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
     # 1.进行具体执行
     print(cases)
     visited_state_addr = visited_addr
-    # visited_state = []
+    visited_state = []
     for case in cases:
         color.info(f"concrect case is: {case}")
         initial_state = project.factory.full_init_state(
@@ -135,13 +186,19 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         initial_state.globals['concrect'] = 1
     
         while len(simulation.stashes['active'])>0 :
-            # print("active length:",len(simulation.stashes['active']))
+            print("active length:",len(simulation.stashes['active']))
             for state in simulation.active:
+                print("constrains length is",len(state.solver.constraints))
+                color.info(f"this state's idx is: {state.globals['idx']}")
                 if state.addr not in visited_state_addr:
                     visited_state_addr.append(state.addr)
-                    # visited_state.append(state)
+                    visited_state.append(state)
+                def dd(state):
+                    # color.error(f"随机数长度-->{len(random_scanf_num)}")
+                    return len(state.solver.constraints) > 80 or state.globals['idx']>=22
+                simulation.drop(filter_func=dd)
                 # print("active state input:  ",state.posix.dumps(0))
-                # print("active state output:  ",state.posix.dumps(1))
+                print("active state output:  ",state.posix.dumps(1))
             #  print(simulation.stashes)
             simulation.step()
         color.warning(f"visited addr length is:{len(visited_state_addr)}")
@@ -166,14 +223,15 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         initial_state.solver.add(i>0,i<10)
     simulation = project.factory.simgr(initial_state)
     initial_state.globals['concrect'] = 0
-    initial_state.globals['scanf_solutions'] = []
+    # initial_state.globals['scanf_solutions'] = []
     new_states = []
     while simulation.active:
         for state in simulation.active:
+            print("active state output:  ",state.posix.dumps(1))
             # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
             def dd(state):
-                color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
-                return len(state.globals['scanf_solutions']) > 100
+                # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
+                return len(state.solver.constraints) > 100
             simulation.drop(filter_func=dd)
             print("active state output:  ",state.posix.dumps(1))
             if state.addr not in visited_state_addr:
@@ -195,7 +253,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         # print("active state input:  ",new_st.posix.dumps(0))
         print("active state output:  ",new_st.posix.dumps(1))
     #     sscanf_stored_solution = new_st.globals['sscanf_solutions']
-        scanf_stored_solution = new_st.globals['scanf_solutions']
+        # scanf_stored_solution = new_st.globals['scanf_solutions']
     #     # print(scanf_stored_solution)
     #     # print(sscanf_stored_solution)
         # if sscanf_stored_solution:
@@ -206,9 +264,9 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         print(random_scanf_num)
     #     # random_scanf_num = []
     #     print(scanf_stored_solution)
-        if scanf_stored_solution:
-            solution_scanf = ' '.join(map(str, map(new_st.solver.eval, scanf_stored_solution)))
-            print(solution_scanf)
+        # if scanf_stored_solution:
+            # solution_scanf = ' '.join(map(str, map(new_st.solver.eval, scanf_stored_solution)))
+            # print(solution_scanf)
         
         color.warning("_________________")
         v1v2v3 = []
@@ -288,7 +346,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
    
 if __name__ == "__main__":
     from main_totinfo import Target
-    target = Target(num_points_=12,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"schedule","source.alt"),target_name_="schedule")   
+    target = Target(num_points_=32,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"schedule2","source.alt"),target_name_="schedule2")   
     cases = [
 # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
 # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
@@ -297,7 +355,7 @@ if __name__ == "__main__":
 # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
 # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
 # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+[ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
 # [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
 # [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
 # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
@@ -355,4 +413,5 @@ if __name__ == "__main__":
 # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
 # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
 ]
-    pass_cases_to_DSE_and_get_new_case_back_to_GA(cases,target)
+    visited= []
+    pass_cases_to_DSE_and_get_new_case_back_to_GA(cases,target,visited)

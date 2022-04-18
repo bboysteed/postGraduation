@@ -76,15 +76,20 @@ get_command(command, prio, ratio)
     {
 	*prio = *command = -1; *ratio =-1.0;
 	sscanf(buf, "%d", command);
+    printf("command is:%d",*command);
 	switch(*command)
 	{
 	  case NEW_JOB :
+      printf("command_1");
 	    sscanf(buf, "%*s%d", prio);
 	    break;
 	  case UNBLOCK :
+    printf("command_4");
+
 	    sscanf(buf, "%*s%f", ratio);
 	    break;
 	  case UPGRADE_PRIO :
+      printf("command_2");
 	    sscanf(buf, "%*s%d%f", prio, ratio);
 	    break;
 	}
