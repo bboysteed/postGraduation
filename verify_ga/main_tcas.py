@@ -35,9 +35,9 @@ target = Target(num_points_=12,exe_path_=os.path.join(os.path.abspath(os.path.di
 
 def get_conv_rate(serial):
     
-    input_data = " ".join([str(ii) for ii in serial]) + "\n"
-    cui.info("a case is: {}".format(input_data.rstrip()))
-    run_bench_file(input_=input_data.encode(),target = target)  # 运行程序
+    # input_data = " ".join([str(ii) for ii in serial]) + "\n"
+    # cui.info("a case is: {}".format(input_data.rstrip()))
+    run_bench_file(input_=serial,target = target)  # 运行程序
     gcovr_save_xml(target_=target)
     covr_rate = parse_xml_and_get_rate(target_=target)
     return covr_rate   
@@ -59,22 +59,23 @@ def createPopulation(self):
 
     # self.allChrom += self.Chrom
     return self.Chrom
-#gcovr -r . --html --html-details -o coverage.html
+#gcovr -r . --html --html-details -o coverage.html 
 def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=5, prob_mut=0.5)
-    best_points, best_distance = ga_tsp.run(target_ = target)
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=6, prob_mut=0.5)
+    visited_addr = []
+    best_points, best_distance = ga_tsp.run(target_ = target,visited_addr=visited_addr)
     print(best_points,best_distance)
     println(ga_tsp.Chrom)
 
-    y_data = ga_tsp.generation_best_Y
+    y_data = [round(float(num),2) for num in ga_tsp.generation_best_Y]
     x_data = np.linspace(1,len(y_data),len(y_data))
 
 
     (
         Line()
         .set_global_opts(
-            tooltip_opts=opts.TooltipOpts(is_show=False),
+            tooltip_opts=opts.TooltipOpts(is_show=True),
             xaxis_opts=opts.AxisOpts(type_="category"),
             yaxis_opts=opts.AxisOpts(
                 type_="value",
@@ -88,9 +89,9 @@ def main():
             y_axis=y_data,
             symbol="emptyCircle",
             is_symbol_show=True,
-            label_opts=opts.LabelOpts(is_show=False),
+            label_opts=opts.LabelOpts(is_show=True),
         )
-        .render(os.path.join(target.target_exe_path,"results.html"))
+        .render(os.path.join(target.target_exe_path,f"results_{target.target_name}.html"))
     )
 
 if __name__ == '__main__':

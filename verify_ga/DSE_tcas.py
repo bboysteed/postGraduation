@@ -13,6 +13,7 @@ defaultdict(<class 'list'>, {
 
 
 """
+import datetime
 from os import lseek
 import sys
 import angr
@@ -20,128 +21,49 @@ import claripy
 import subprocess
 import os
 argv = sys.argv
+from utils.pycui import *
+color = pycui()
+
 
 def format_cases(chrom):
     return [[str(i) for i in case] for case in chrom]
-def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
+def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_addr):
     cases = format_cases(pass_cases_)
-    # [
-    # [ "701","253","261","407","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","972","899","582","554","811","680","211","415","986" ],
-    # [ "442","475","656","642","839","846","463","100","662","936","610","205" ],
-    # [ "701","253","407","261","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","642","839","846","463","100","662","936","610","986" ],
-    # [ "442","475","656","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","261","407","762","92","244","505","317","153","617","419" ],
-    # [ "496","573","116","417","935","447","6","342","335","110","169","357" ],
-    # [ "442","475","656","662","839","846","463","100","642","936","610","986" ],
-    # [ "854","694","349","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","407","261","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","642","839","846","463","100","662","936","610","986" ],
-    # [ "442","475","656","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","261","417","935","573","6","505","335","110","617","419" ],
-    # [ "496","447","116","407","762","92","244","342","317","153","169","357" ],
-    # [ "899","475","349","972","442","582","554","811","680","211","415","986" ],
-    # [ "854","694","656","642","662","846","463","100","839","936","610","205" ],
-    # [ "701","253","407","261","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","642","839","846","463","100","662","936","610","986" ],
-    # [ "442","475","656","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","261","407","762","92","244","505","317","153","617","419" ],
-    # [ "496","573","116","417","935","447","6","342","335","110","169","357" ],
-    # [ "442","475","656","662","839","846","463","100","642","936","610","986" ],
-    # [ "854","694","349","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","407","261","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","642","839","846","463","100","662","936","610","986" ],
-    # [ "442","475","656","972","899","582","554","811","680","211","415","205" ],
-    # [ "335","253","261","407","762","92","244","505","701","153","617","419" ],
-    # [ "496","447","573","417","935","116","6","342","317","110","169","357" ],
-    # [ "442","475","656","642","839","582","554","811","680","211","415","986" ],
-    # [ "854","694","349","972","899","846","463","100","662","936","610","205" ],
-    # [ "701","253","407","261","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","642","839","846","463","100","662","936","610","986" ],
-    # [ "442","475","656","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","261","407","762","92","244","505","317","153","617","419" ],
-    # [ "496","573","116","417","935","447","6","342","335","110","169","357" ],
-    # [ "442","475","656","662","839","846","463","100","642","936","610","986" ],
-    # [ "854","694","349","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","407","261","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","642","839","846","463","100","662","936","610","986" ],
-    # [ "442","475","656","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","261","417","935","573","6","505","335","110","617","419" ],
-    # [ "496","447","116","407","762","92","244","342","317","153","169","357" ],
-    # [ "899","475","349","972","442","582","554","811","680","211","415","986" ],
-    # [ "854","694","656","642","662","846","463","100","839","936","610","205" ],
-    # [ "701","253","407","261","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","642","839","846","463","100","662","936","610","986" ],
-    # [ "442","475","656","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","261","407","762","92","244","505","317","153","617","419" ],
-    # [ "496","573","116","417","935","447","6","342","335","110","169","357" ],
-    # [ "442","475","656","662","839","846","463","100","642","936","610","986" ],
-    # [ "854","694","349","972","899","582","554","811","680","211","415","205" ],
-    # [ "701","253","407","261","762","92","244","505","335","110","617","419" ],
-    # [ "496","447","116","417","935","573","6","342","317","153","169","357" ],
-    # [ "854","694","349","642","839","846","463","100","662","936","610","986" ],
-    # [ "442","475","656","972","899","582","554","811","680","211","415","205" ]
-    # ]
-
-    cases_map = {}
-
-    if len(argv) == 1:
-        # path_to_binary = "/home/steed/verify_ga/tcas/source.alt/tcas"
-        path_to_binary = os.path.join(target.target_exe_path,target.target_name)
-    else:
-        path_to_binary = argv[1]  # :string
-        
-    project = angr.Project(path_to_binary)
-    #初始状态
-    #initial_state = project.factory.entry_state()
-    #输入命令行参数后状态
-    # args = [claripy.BVS("argv{}".format(i),   4 * 8) for i in range(1,13)]+[claripy.BVV('\n')]
-    # args = claripy.Concat(*args)
-    # initial_state = project.factory.entry_state(args=["/home/steed/verify_ga/tcas/source.alt/tcas"]+args)  
+    path_to_binary = os.path.join(target.target_exe_path,target.target_name)
+    project = angr.Project(path_to_binary) 
     for case in cases:
         initial_state = project.factory.entry_state(args=[path_to_binary]+case)  
         simulation = project.factory.simgr(initial_state)
-        while(len(simulation.stashes['active'])>0):
+        while simulation.active:
             for active_state in simulation.stashes['active']:
-                cases_map[active_state.addr] = 1
+                if active_state not in visited_addr:
+                    visited_addr.append(active_state.addr)
 
         # a = input("go on?")
             simulation.step()
             # print(simulation.stashes)
-    print("all visited addr:\n",cases_map,len(cases_map))
+    print("all visited addr:\n",visited_addr,len(visited_addr))
     # while(a=="1"):
     #     a = input("go on?")
     #     simulation.strp()
     print(simulation.stashes)
 
 
-    args = [claripy.BVS("argv{}".format(i),   4 * 8) for i in range(1,13)]+[claripy.BVV('\n')]
+    args = [claripy.BVS("argv{}".format(i),   4 * 8) for i in range(1,13)]+[claripy.BVV(b'\n')]
     # args = claripy.Concat(*args)
-    initial_state = project.factory.entry_state(args=["/home/steed/verify_ga/tcas/source.alt/tcas"]+args)  
+    initial_state = project.factory.entry_state(args=[path_to_binary]+args)  
     simulation = project.factory.simgr(initial_state)
     new_state = []
     new_state_addr = []
-    while len(simulation.stashes['active'])>0:
-        simulation.step()
+    while simulation.active:
         for active_state in simulation.stashes['active']:
-            if active_state.addr not in cases_map.keys():
-                # print("get the new state,oh yeah!")
-                if active_state.addr not in new_state_addr:
-                    new_state_addr.append(active_state.addr)
-                    new_state.append(active_state)
-                # print(simulation.stashes['active'])
-    # #去重复
-    # new_state_addr = list(set([state.addr for state in new_state]))
-    # new_unique_state = [state for state in new_state if state.addr not i]
+            if active_state.addr not in visited_addr:
+                visited_addr.append(active_state.addr)
+                color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
+                new_state.append(active_state)
+        simulation.step()
+    if not new_state:
+        color.warning("no more new state found !")
     print("new cases addr:\n",new_state,len(new_state))
     all_cases = []
     for state in new_state:
@@ -153,7 +75,8 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target):
             # print(ans_)
             ret = subprocess.check_output(args=["./test_atoi",ans_])
             new_case.append(ret.decode())
-        all_cases.append(new_case)
+        if new_case not in all_cases:
+            all_cases.append(new_case)
     print(all_cases)
     return all_cases
 

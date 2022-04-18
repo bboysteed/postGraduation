@@ -6,24 +6,18 @@ color = pycui()
 
 def run_bench_file(input_,target):
     exefilepath = target.target_exe_path
-    # # color.success("重写MakeFile...")
-    # makeFile = open(os.path.join(exefilepath, "Makefile"), "w")
-    # module_name = target.target_name
-    # makeFile.write(
-    #     f"CFLAGS = -lm -ftest-coverage -fprofile-arcs -fPIC\nall: {module_name}\nclean:\n\trm -f {module_name} {module_name}.gcda\n\trm -f {module_name}.gcno cov.xml")
-    # makeFile.close()
-    #清除编译痕迹
-    # subprocess.call("make -C {} clean".format(exefilepath))
-    #编译文件
-    # subprocess.run("make -C {} all".format(exefilepath))
-    #运行文件
-    # print(input_)
-    # os.system("{} {}".format(os.path.join(exefilepath,target.target_name),input_.decode()))
-    # print(input_)
-    # args=
     color.info(f'input a case :{" ".join([str(i) for i in input_])}')
-    subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_[:3]], input=" ".join([str(i) for i in input_[3:]]).encode()+b'\n')
-    
+
+    if target.target_name == "tcas":
+        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
+    elif target.target_name == "totinfo":
+        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
+    elif target.name == "schedule":
+        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
+    elif target.target_name == "schedule2":
+        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
+    else:
+        color.error(f"wrong target name:{target.target_name}")
 
 
 def gcovr_save_xml(target_):
