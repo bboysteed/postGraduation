@@ -269,18 +269,18 @@
             <td class="headerValue">schedule2.c</td>
             <td></td>
             <td class="headerName">Lines:</td>
-            <td class="headerTableEntry">136</td>
+            <td class="headerTableEntry">132</td>
             <td class="headerTableEntry">143</td>
-            <td class="headerTableEntry" style="background-color:LightGreen">95.1 %</td>
+            <td class="headerTableEntry" style="background-color:LightGreen">92.3 %</td>
           </tr>
           <tr>
             <td class="headerName">Date:</td>
-            <td class="headerValue">2022-04-18 16:59:01</td>
+            <td class="headerValue">2022-04-19 16:19:01</td>
             <td></td>
             <td class="headerName">Branches:</td>
-            <td class="headerTableEntry">72</td>
+            <td class="headerTableEntry">68</td>
             <td class="headerTableEntry">88</td>
-            <td class="headerTableEntry" style="background-color:#FFFF55">81.8 %</td>
+            <td class="headerTableEntry" style="background-color:#FFFF55">77.3 %</td>
           </tr>
         </table>
       </td>
@@ -456,7 +456,7 @@
     <tr>
     <td align="right" class="lineno"><pre>23</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1949</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1745</pre></td>
     <td align="left" class="src coveredLine"><pre>enqueue(prio, new_process)</pre></td>
     </tr>
 
@@ -490,15 +490,15 @@
 
     <tr>
     <td align="right" class="lineno"><pre>28</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 8 times">&check;</span><span class="takenBranch" title="Branch 2 taken 1941 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>1949</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 6 times">&check;</span><span class="takenBranch" title="Branch 2 taken 1739 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>1745</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(status = put_end(prio, new_process)) return(status); /* Error */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>29</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1941</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1739</pre></td>
     <td align="left" class="src coveredLine"><pre>    return(reschedule(prio));</pre></td>
     </tr>
 
@@ -589,7 +589,7 @@
     <tr>
     <td align="right" class="lineno"><pre>42</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>main(argc, argv) /* n3, n2, n1 : # of processes at prio3 ... */</pre></td>
     </tr>
 
@@ -644,15 +644,15 @@
 
     <tr>
     <td align="right" class="lineno"><pre>50</pre></td>
-    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 0 not taken">&cross;</span><span class="takenBranch" title="Branch 1 taken 136 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 0 not taken">&cross;</span><span class="takenBranch" title="Branch 1 taken 135 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(argc != MAXPRIO + 1) exit_here(BADNOARGS);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>51</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 408 times">&check;</span><span class="takenBranch" title="Branch 1 taken 136 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>544</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 405 times">&check;</span><span class="takenBranch" title="Branch 1 taken 135 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>540</pre></td>
     <td align="left" class="src coveredLine"><pre>    for(prio = MAXPRIO; prio > 0; prio--)</pre></td>
     </tr>
 
@@ -665,15 +665,15 @@
 
     <tr>
     <td align="right" class="lineno"><pre>53</pre></td>
-    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 2 taken 408 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>408</pre></td>
+    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 2 taken 405 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>405</pre></td>
     <td align="left" class="src coveredLine"><pre>	if((nprocs = atoi(argv[MAXPRIO + 1 - prio])) &lt; 0) exit_here(BADARG);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>54</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 1876 times">&check;</span><span class="takenBranch" title="Branch 1 taken 408 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>2284</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 1657 times">&check;</span><span class="takenBranch" title="Branch 1 taken 405 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>2062</pre></td>
     <td align="left" class="src coveredLine"><pre>	for(; nprocs > 0; nprocs--)</pre></td>
     </tr>
 
@@ -686,8 +686,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>56</pre></td>
-    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 2 taken 1876 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>1876</pre></td>
+    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 2 taken 1657 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>1657</pre></td>
     <td align="left" class="src coveredLine"><pre>	    if(status = new_job(prio)) exit_here(status);</pre></td>
     </tr>
 
@@ -714,8 +714,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>60</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 136 times">&check;</span><span class="takenBranch" title="Branch 2 taken 136 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>272</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 135 times">&check;</span><span class="takenBranch" title="Branch 2 taken 135 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>270</pre></td>
     <td align="left" class="src coveredLine"><pre>    while((status = get_command(&amp;command, &amp;prio, &amp;ratio)) > 0)</pre></td>
     </tr>
 
@@ -729,7 +729,7 @@
     <tr>
     <td align="right" class="lineno"><pre>62</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>	schedule(command, prio, ratio);</pre></td>
     </tr>
 
@@ -742,15 +742,15 @@
 
     <tr>
     <td align="right" class="lineno"><pre>64</pre></td>
-    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 0 not taken">&cross;</span><span class="takenBranch" title="Branch 1 taken 136 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 0 not taken">&cross;</span><span class="takenBranch" title="Branch 1 taken 135 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(status &lt; 0) exit_here(status); /* Real bad error */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>65</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    exit_here(OK);</pre></td>
     </tr>
 
@@ -778,7 +778,7 @@
     <tr>
     <td align="right" class="lineno"><pre>69</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>272</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>270</pre></td>
     <td align="left" class="src coveredLine"><pre>get_command(command, prio, ratio)</pre></td>
     </tr>
 
@@ -806,7 +806,7 @@
     <tr>
     <td align="right" class="lineno"><pre>73</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>272</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>270</pre></td>
     <td align="left" class="src coveredLine"><pre>    int status = OK;</pre></td>
     </tr>
 
@@ -819,8 +819,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>75</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 136 times">&check;</span><span class="takenBranch" title="Branch 2 taken 136 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>272</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 135 times">&check;</span><span class="takenBranch" title="Branch 2 taken 135 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>270</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(fgets(buf, CMDSIZE, stdin))</pre></td>
     </tr>
 
@@ -834,28 +834,28 @@
     <tr>
     <td align="right" class="lineno"><pre>77</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>	*prio = *command = -1; *ratio =-1.0;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>78</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>	sscanf(buf, "%d", command);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>79</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    printf("command is:%d",*command);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>80</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 12 times">&check;</span><span class="takenBranch" title="Branch 1 taken 19 times">&check;</span><span class="takenBranch" title="Branch 2 taken 24 times">&check;</span><span class="takenBranch" title="Branch 3 taken 81 times">&check;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 10 times">&check;</span><span class="takenBranch" title="Branch 1 taken 22 times">&check;</span><span class="takenBranch" title="Branch 2 taken 8 times">&check;</span><span class="takenBranch" title="Branch 3 taken 95 times">&check;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>	switch(*command)</pre></td>
     </tr>
 
@@ -869,42 +869,42 @@
     <tr>
     <td align="right" class="lineno"><pre>82</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>12</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>10</pre></td>
     <td align="left" class="src coveredLine"><pre>	  case NEW_JOB :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>83</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>12</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>10</pre></td>
     <td align="left" class="src coveredLine"><pre>      printf("command_1");</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>84</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>12</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>10</pre></td>
     <td align="left" class="src coveredLine"><pre>	    sscanf(buf, "%*s%d", prio);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>85</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>12</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>10</pre></td>
     <td align="left" class="src coveredLine"><pre>	    break;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>86</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>	  case UNBLOCK :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>87</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>    printf("command_4");</pre></td>
     </tr>
 
@@ -918,42 +918,42 @@
     <tr>
     <td align="right" class="lineno"><pre>89</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>	    sscanf(buf, "%*s%f", ratio);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>90</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>	    break;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>91</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>	  case UPGRADE_PRIO :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>92</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>      printf("command_2");</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>93</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>	    sscanf(buf, "%*s%d%f", prio, ratio);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>94</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>	    break;</pre></td>
     </tr>
 
@@ -973,15 +973,15 @@
 
     <tr>
     <td align="right" class="lineno"><pre>97</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 434 times">&check;</span><span class="takenBranch" title="Branch 1 taken 136 times">&check;</span><span class="takenBranch" title="Branch 3 taken 434 times">&check;</span><span class="notTakenBranch" title="Branch 4 not taken">&cross;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>570</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 491 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 3 taken 356 times">&check;</span><span class="takenBranch" title="Branch 4 taken 135 times">&check;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>491</pre></td>
     <td align="left" class="src coveredLine"><pre>	while(buf[strlen(buf)-1] != '\n' &amp;&amp; fgets(buf, CMDSIZE, stdin));</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>98</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>	return(TRUE);</pre></td>
     </tr>
 
@@ -995,7 +995,7 @@
     <tr>
     <td align="right" class="lineno"><pre>100</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    else return(FALSE);</pre></td>
     </tr>
 
@@ -1016,7 +1016,7 @@
     <tr>
     <td align="right" class="lineno"><pre>103</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>exit_here(status)</pre></td>
     </tr>
 
@@ -1037,7 +1037,7 @@
     <tr>
     <td align="right" class="lineno"><pre>106</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    exit(abs(status));</pre></td>
     </tr>
 
@@ -1072,7 +1072,7 @@
     <tr>
     <td align="right" class="lineno"><pre>111</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>new_job(prio) /* allocate new pid and process block. Stick at end */</pre></td>
     </tr>
 
@@ -1093,7 +1093,7 @@
     <tr>
     <td align="right" class="lineno"><pre>114</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>    int pid, status = OK;</pre></td>
     </tr>
 
@@ -1107,21 +1107,21 @@
     <tr>
     <td align="right" class="lineno"><pre>116</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>    pid = next_pid++;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>117</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>    new_process = (struct process *) malloc(sizeof(struct process));</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>118</pre></td>
-    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 0 not taken">&cross;</span><span class="takenBranch" title="Branch 1 taken 1888 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linebranch"><span class="notTakenBranch" title="Branch 0 not taken">&cross;</span><span class="takenBranch" title="Branch 1 taken 1667 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(!new_process) status = MALLOC_ERR;</pre></td>
     </tr>
 
@@ -1142,35 +1142,35 @@
     <tr>
     <td align="right" class="lineno"><pre>121</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>	new_process->pid = pid;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>122</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>	new_process->priority = prio;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>123</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>	new_process->next = (struct process *) 0;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>124</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>	status = enqueue(prio, new_process);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>125</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 8 times">&check;</span><span class="takenBranch" title="Branch 1 taken 1880 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 6 times">&check;</span><span class="takenBranch" title="Branch 1 taken 1661 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>	if(status)</pre></td>
     </tr>
 
@@ -1184,7 +1184,7 @@
     <tr>
     <td align="right" class="lineno"><pre>127</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>6</pre></td>
     <td align="left" class="src coveredLine"><pre>	    free(new_process); /* Return process block */</pre></td>
     </tr>
 
@@ -1204,15 +1204,15 @@
 
     <tr>
     <td align="right" class="lineno"><pre>130</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 8 times">&check;</span><span class="takenBranch" title="Branch 1 taken 1880 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 6 times">&check;</span><span class="takenBranch" title="Branch 1 taken 1661 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(status) next_pid--; /* Unsuccess. Restore pid */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>131</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1888</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1667</pre></td>
     <td align="left" class="src coveredLine"><pre>    return(status);</pre></td>
     </tr>
 
@@ -1233,7 +1233,7 @@
     <tr>
     <td align="right" class="lineno"><pre>134</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>int upgrade_prio(prio, ratio) /* increment priority at ratio in queue */</pre></td>
     </tr>
 
@@ -1274,16 +1274,16 @@
 
     <tr>
     <td align="right" class="lineno"><pre>140</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 24 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 2 taken 12 times">&check;</span><span class="takenBranch" title="Branch 3 taken 12 times">&check;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 8 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 2 taken 8 times">&check;</span><span class="notTakenBranch" title="Branch 3 not taken">&cross;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(prio &lt; 1 || prio > MAXLOPRIO) return(BADPRIO);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>141</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 3 times">&check;</span><span class="takenBranch" title="Branch 2 taken 9 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>12</pre></td>
-    <td align="left" class="src coveredLine"><pre>    if((status = get_process(prio, ratio, &amp;job)) &lt;= 0) return(status);</pre></td>
+    <td align="right" class="linebranch"></td>
+    <td align="right" class="linecount uncoveredLine"><pre></pre></td>
+    <td align="left" class="src uncoveredLine"><pre>    if((status = get_process(prio, ratio, &amp;job)) &lt;= 0) return(status);</pre></td>
     </tr>
 
     <tr>
@@ -1296,15 +1296,15 @@
     <tr>
     <td align="right" class="lineno"><pre>143</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>9</pre></td>
-    <td align="left" class="src coveredLine"><pre>    job->priority = prio + 1;</pre></td>
+    <td align="right" class="linecount uncoveredLine"><pre></pre></td>
+    <td align="left" class="src uncoveredLine"><pre>    job->priority = prio + 1;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>144</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>9</pre></td>
-    <td align="left" class="src coveredLine"><pre>    return(enqueue(prio + 1, job));</pre></td>
+    <td align="right" class="linecount uncoveredLine"><pre></pre></td>
+    <td align="left" class="src uncoveredLine"><pre>    return(enqueue(prio + 1, job));</pre></td>
     </tr>
 
     <tr>
@@ -1331,7 +1331,7 @@
     <tr>
     <td align="right" class="lineno"><pre>148</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>41</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>45</pre></td>
     <td align="left" class="src coveredLine"><pre>block() /* Put current job in blocked queue */</pre></td>
     </tr>
 
@@ -1352,14 +1352,14 @@
     <tr>
     <td align="right" class="lineno"><pre>151</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>41</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>45</pre></td>
     <td align="left" class="src coveredLine"><pre>    job = get_current();</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>152</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 41 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>41</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 45 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>45</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(job)</pre></td>
     </tr>
 
@@ -1373,14 +1373,14 @@
     <tr>
     <td align="right" class="lineno"><pre>154</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>41</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>45</pre></td>
     <td align="left" class="src coveredLine"><pre>	current_job = (struct process *)0; /* remove it */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>155</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>41</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>45</pre></td>
     <td align="left" class="src coveredLine"><pre>	return(enqueue(BLOCKPRIO, job)); /* put into blocked queue */</pre></td>
     </tr>
 
@@ -1422,7 +1422,7 @@
     <tr>
     <td align="right" class="lineno"><pre>161</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>unblock(ratio) /* Restore job @ ratio in blocked queue to its queue */</pre></td>
     </tr>
 
@@ -1456,8 +1456,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>166</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 19 times">&check;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 22 times">&check;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>    if((status = get_process(BLOCKPRIO, ratio, &amp;job)) &lt;= 0) return(status);</pre></td>
     </tr>
 
@@ -1499,7 +1499,7 @@
     <tr>
     <td align="right" class="lineno"><pre>172</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>33</pre></td>
     <td align="left" class="src coveredLine"><pre>quantum_expire() /* put current job at end of its queue */</pre></td>
     </tr>
 
@@ -1520,14 +1520,14 @@
     <tr>
     <td align="right" class="lineno"><pre>175</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>33</pre></td>
     <td align="left" class="src coveredLine"><pre>    job = get_current();</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>176</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 11 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 33 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>33</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(job)</pre></td>
     </tr>
 
@@ -1541,14 +1541,14 @@
     <tr>
     <td align="right" class="lineno"><pre>178</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>33</pre></td>
     <td align="left" class="src coveredLine"><pre>	current_job = (struct process *)0; /* remove it */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>179</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>33</pre></td>
     <td align="left" class="src coveredLine"><pre>	return(enqueue(job->priority, job));</pre></td>
     </tr>
 
@@ -1590,7 +1590,7 @@
     <tr>
     <td align="right" class="lineno"><pre>185</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>299</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>105</pre></td>
     <td align="left" class="src coveredLine"><pre>finish() /* Get current job, print it, and zap it. */</pre></td>
     </tr>
 
@@ -1611,14 +1611,14 @@
     <tr>
     <td align="right" class="lineno"><pre>188</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>299</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>105</pre></td>
     <td align="left" class="src coveredLine"><pre>    job = get_current();</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>189</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 279 times">&check;</span><span class="takenBranch" title="Branch 1 taken 20 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>299</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 99 times">&check;</span><span class="takenBranch" title="Branch 1 taken 6 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>105</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(job)</pre></td>
     </tr>
 
@@ -1632,35 +1632,35 @@
     <tr>
     <td align="right" class="lineno"><pre>191</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>279</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>99</pre></td>
     <td align="left" class="src coveredLine"><pre>	current_job = (struct process *)0;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>192</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>279</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>99</pre></td>
     <td align="left" class="src coveredLine"><pre>	reschedule(0);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>193</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>279</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>99</pre></td>
     <td align="left" class="src coveredLine"><pre>	fprintf(stdout, " %d", job->pid);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>194</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>279</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>99</pre></td>
     <td align="left" class="src coveredLine"><pre>	free(job);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>195</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>279</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>99</pre></td>
     <td align="left" class="src coveredLine"><pre>	return(FALSE);</pre></td>
     </tr>
 
@@ -1674,7 +1674,7 @@
     <tr>
     <td align="right" class="lineno"><pre>197</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>20</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>6</pre></td>
     <td align="left" class="src coveredLine"><pre>    else return(TRUE);</pre></td>
     </tr>
 
@@ -1702,7 +1702,7 @@
     <tr>
     <td align="right" class="lineno"><pre>201</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>20</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>6</pre></td>
     <td align="left" class="src coveredLine"><pre>flush() /* Get all jobs in priority queues &amp; zap them */</pre></td>
     </tr>
 
@@ -1715,22 +1715,22 @@
 
     <tr>
     <td align="right" class="lineno"><pre>203</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 270 times">&check;</span><span class="takenBranch" title="Branch 2 taken 20 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>290</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 88 times">&check;</span><span class="takenBranch" title="Branch 2 taken 6 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>94</pre></td>
     <td align="left" class="src coveredLine"><pre>    while(!finish());</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>204</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>20</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>6</pre></td>
     <td align="left" class="src coveredLine"><pre>    fprintf(stdout, "\n");</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>205</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>20</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>6</pre></td>
     <td align="left" class="src coveredLine"><pre>    return(OK);</pre></td>
     </tr>
 
@@ -1758,7 +1758,7 @@
     <tr>
     <td align="right" class="lineno"><pre>209</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>2571</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>2021</pre></td>
     <td align="left" class="src coveredLine"><pre>get_current() /* If no current process, get it. Return it */</pre></td>
     </tr>
 
@@ -1778,8 +1778,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>212</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 487 times">&check;</span><span class="takenBranch" title="Branch 1 taken 2084 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>2571</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 318 times">&check;</span><span class="takenBranch" title="Branch 1 taken 1703 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>2021</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(!current_job)</pre></td>
     </tr>
 
@@ -1792,8 +1792,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>214</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 873 times">&check;</span><span class="takenBranch" title="Branch 1 taken 40 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>913</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 445 times">&check;</span><span class="takenBranch" title="Branch 1 taken 12 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>457</pre></td>
     <td align="left" class="src coveredLine"><pre>	for(prio = MAXPRIO; prio > 0; prio--)</pre></td>
     </tr>
 
@@ -1806,8 +1806,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>216</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 447 times">&check;</span><span class="takenBranch" title="Branch 2 taken 426 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>873</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 1 taken 306 times">&check;</span><span class="takenBranch" title="Branch 2 taken 139 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>445</pre></td>
     <td align="left" class="src coveredLine"><pre>	    if(get_process(prio, 0.0, &amp;current_job) > 0) break;</pre></td>
     </tr>
 
@@ -1828,7 +1828,7 @@
     <tr>
     <td align="right" class="lineno"><pre>219</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>2571</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>2021</pre></td>
     <td align="left" class="src coveredLine"><pre>    return(current_job);</pre></td>
     </tr>
 
@@ -1856,7 +1856,7 @@
     <tr>
     <td align="right" class="lineno"><pre>223</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>2220</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1838</pre></td>
     <td align="left" class="src coveredLine"><pre>reschedule(prio) /* Put highest priority job into current_job */</pre></td>
     </tr>
 
@@ -1876,8 +1876,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>226</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 1753 times">&check;</span><span class="takenBranch" title="Branch 1 taken 467 times">&check;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span><span class="takenBranch" title="Branch 3 taken 1753 times">&check;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>2220</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 1526 times">&check;</span><span class="takenBranch" title="Branch 1 taken 312 times">&check;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span><span class="takenBranch" title="Branch 3 taken 1526 times">&check;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>1838</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(current_job &amp;&amp; prio > current_job->priority)</pre></td>
     </tr>
 
@@ -1912,14 +1912,14 @@
     <tr>
     <td align="right" class="lineno"><pre>231</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>2220</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1838</pre></td>
     <td align="left" class="src coveredLine"><pre>    get_current(); /* Reschedule */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>232</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>2220</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1838</pre></td>
     <td align="left" class="src coveredLine"><pre>    return(OK);</pre></td>
     </tr>
 
@@ -1947,7 +1947,7 @@
     <tr>
     <td align="right" class="lineno"><pre>236</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>schedule(command, prio, ratio)</pre></td>
     </tr>
 
@@ -1975,14 +1975,14 @@
     <tr>
     <td align="right" class="lineno"><pre>240</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    int status = OK;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>241</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 12 times">&check;</span><span class="takenBranch" title="Branch 1 taken 11 times">&check;</span><span class="takenBranch" title="Branch 2 taken 24 times">&check;</span><span class="takenBranch" title="Branch 3 taken 41 times">&check;</span><br/><span class="takenBranch" title="Branch 4 taken 19 times">&check;</span><span class="takenBranch" title="Branch 5 taken 9 times">&check;</span><span class="takenBranch" title="Branch 6 taken 20 times">&check;</span><span class="notTakenBranch" title="Branch 7 not taken">&cross;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 10 times">&check;</span><span class="takenBranch" title="Branch 1 taken 33 times">&check;</span><span class="takenBranch" title="Branch 2 taken 8 times">&check;</span><span class="takenBranch" title="Branch 3 taken 45 times">&check;</span><br/><span class="takenBranch" title="Branch 4 taken 22 times">&check;</span><span class="takenBranch" title="Branch 5 taken 11 times">&check;</span><span class="takenBranch" title="Branch 6 taken 6 times">&check;</span><span class="notTakenBranch" title="Branch 7 not taken">&cross;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    switch(command)</pre></td>
     </tr>
 
@@ -1996,154 +1996,154 @@
     <tr>
     <td align="right" class="lineno"><pre>243</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>12</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>10</pre></td>
     <td align="left" class="src coveredLine"><pre>      case NEW_JOB :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>244</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>12</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>10</pre></td>
     <td align="left" class="src coveredLine"><pre>        status = new_job(prio);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>245</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>12</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>10</pre></td>
     <td align="left" class="src coveredLine"><pre>	break;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>246</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>33</pre></td>
     <td align="left" class="src coveredLine"><pre>      case QUANTUM_EXPIRE :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>247</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>33</pre></td>
     <td align="left" class="src coveredLine"><pre>        status = quantum_expire();</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>248</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>33</pre></td>
     <td align="left" class="src coveredLine"><pre>	break;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>249</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>      case UPGRADE_PRIO :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>250</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>        status = upgrade_prio(prio, ratio);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>251</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>24</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>8</pre></td>
     <td align="left" class="src coveredLine"><pre>	break;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>252</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>41</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>45</pre></td>
     <td align="left" class="src coveredLine"><pre>      case BLOCK :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>253</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>41</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>45</pre></td>
     <td align="left" class="src coveredLine"><pre>        status = block();</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>254</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>41</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>45</pre></td>
     <td align="left" class="src coveredLine"><pre>	break;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>255</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>      case UNBLOCK :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>256</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>        status = unblock(ratio);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>257</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>19</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>22</pre></td>
     <td align="left" class="src coveredLine"><pre>	break;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>258</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>9</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
     <td align="left" class="src coveredLine"><pre>      case FINISH :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>259</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>9</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
     <td align="left" class="src coveredLine"><pre>        finish();</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>260</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>9</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
     <td align="left" class="src coveredLine"><pre>	fprintf(stdout, "\n");</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>261</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>9</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>11</pre></td>
     <td align="left" class="src coveredLine"><pre>	break;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>262</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>20</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>6</pre></td>
     <td align="left" class="src coveredLine"><pre>      case FLUSH :</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>263</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>20</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>6</pre></td>
     <td align="left" class="src coveredLine"><pre>        status = flush();</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>264</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>20</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>6</pre></td>
     <td align="left" class="src coveredLine"><pre>	break;</pre></td>
     </tr>
 
@@ -2171,7 +2171,7 @@
     <tr>
     <td align="right" class="lineno"><pre>268</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>136</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>135</pre></td>
     <td align="left" class="src coveredLine"><pre>    return(status);</pre></td>
     </tr>
 
@@ -2220,7 +2220,7 @@
     <tr>
     <td align="right" class="lineno"><pre>275</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1949</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1745</pre></td>
     <td align="left" class="src coveredLine"><pre>put_end(prio, process) /* Put process at end of queue */</pre></td>
     </tr>
 
@@ -2254,8 +2254,8 @@
 
     <tr>
     <td align="right" class="lineno"><pre>280</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 1941 times">&check;</span><span class="takenBranch" title="Branch 1 taken 8 times">&check;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span><span class="takenBranch" title="Branch 3 taken 1941 times">&check;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>1949</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 1739 times">&check;</span><span class="takenBranch" title="Branch 1 taken 6 times">&check;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span><span class="takenBranch" title="Branch 3 taken 1739 times">&check;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>1745</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(prio > MAXPRIO || prio &lt; 0) return(BADPRIO); /* Somebody goofed */</pre></td>
     </tr>
 
@@ -2268,29 +2268,29 @@
 
     <tr>
     <td align="right" class="lineno"><pre>282</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 4107 times">&check;</span><span class="takenBranch" title="Branch 1 taken 1941 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>6048</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 3501 times">&check;</span><span class="takenBranch" title="Branch 1 taken 1739 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>5240</pre></td>
     <td align="left" class="src coveredLine"><pre>    for(next = &amp;prio_queue[prio].head; *next; next = &amp;(*next)->next);</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>283</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1941</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1739</pre></td>
     <td align="left" class="src coveredLine"><pre>    *next = process;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>284</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1941</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1739</pre></td>
     <td align="left" class="src coveredLine"><pre>    prio_queue[prio].length++;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>285</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>1941</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>1739</pre></td>
     <td align="left" class="src coveredLine"><pre>    return(OK);</pre></td>
     </tr>
 
@@ -2318,7 +2318,7 @@
     <tr>
     <td align="right" class="lineno"><pre>289</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>904</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>467</pre></td>
     <td align="left" class="src coveredLine"><pre>get_process(prio, ratio, job)</pre></td>
     </tr>
 
@@ -2366,64 +2366,64 @@
 
     <tr>
     <td align="right" class="lineno"><pre>296</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 904 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span><span class="takenBranch" title="Branch 3 taken 904 times">&check;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>904</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 467 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span><span class="takenBranch" title="Branch 3 taken 467 times">&check;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>467</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(prio > MAXPRIO || prio &lt; 0) return(BADPRIO); /* Somebody goofed */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>297</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 904 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 2 taken 19 times">&check;</span><span class="takenBranch" title="Branch 3 taken 885 times">&check;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>904</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 467 times">&check;</span><span class="notTakenBranch" title="Branch 1 not taken">&cross;</span><span class="takenBranch" title="Branch 2 taken 22 times">&check;</span><span class="takenBranch" title="Branch 3 taken 445 times">&check;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>467</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(ratio &lt; 0.0 || ratio > 1.0) return(BADRATIO); /* Somebody else goofed */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>298</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>885</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>445</pre></td>
     <td align="left" class="src coveredLine"><pre>    length = prio_queue[prio].length;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>299</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>885</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>445</pre></td>
     <td align="left" class="src coveredLine"><pre>    index = ratio * length;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>300</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 433 times">&check;</span><span class="takenBranch" title="Branch 1 taken 452 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>885</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 139 times">&check;</span><span class="takenBranch" title="Branch 1 taken 306 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>445</pre></td>
     <td align="left" class="src coveredLine"><pre>    index = index >= length ? length -1 : index; /* If ratio == 1.0 */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>301</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 445 times">&check;</span><span class="takenBranch" title="Branch 1 taken 456 times">&check;</span><span class="takenBranch" title="Branch 2 taken 16 times">&check;</span><span class="takenBranch" title="Branch 3 taken 429 times">&check;</span><br/></td>
-    <td align="right" class="linecount coveredLine"><pre>901</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 139 times">&check;</span><span class="takenBranch" title="Branch 1 taken 306 times">&check;</span><span class="notTakenBranch" title="Branch 2 not taken">&cross;</span><span class="takenBranch" title="Branch 3 taken 139 times">&check;</span><br/></td>
+    <td align="right" class="linecount coveredLine"><pre>445</pre></td>
     <td align="left" class="src coveredLine"><pre>    for(next = &amp;prio_queue[prio].head; index &amp;&amp; *next; index--)</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>302</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>16</pre></td>
-    <td align="left" class="src coveredLine"><pre>        next = &amp;(*next)->next; /* Count up to it */</pre></td>
+    <td align="right" class="linecount uncoveredLine"><pre></pre></td>
+    <td align="left" class="src uncoveredLine"><pre>        next = &amp;(*next)->next; /* Count up to it */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>303</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>885</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>445</pre></td>
     <td align="left" class="src coveredLine"><pre>    *job = *next;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>304</pre></td>
-    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 456 times">&check;</span><span class="takenBranch" title="Branch 1 taken 429 times">&check;</span></td>
-    <td align="right" class="linecount coveredLine"><pre>885</pre></td>
+    <td align="right" class="linebranch"><span class="takenBranch" title="Branch 0 taken 306 times">&check;</span><span class="takenBranch" title="Branch 1 taken 139 times">&check;</span></td>
+    <td align="right" class="linecount coveredLine"><pre>445</pre></td>
     <td align="left" class="src coveredLine"><pre>    if(*job)</pre></td>
     </tr>
 
@@ -2437,28 +2437,28 @@
     <tr>
     <td align="right" class="lineno"><pre>306</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>456</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>306</pre></td>
     <td align="left" class="src coveredLine"><pre>	*next = (*next)->next; /* Mend the chain */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>307</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>456</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>306</pre></td>
     <td align="left" class="src coveredLine"><pre>	(*job)->next = (struct process *) 0; /* break this link */</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>308</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>456</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>306</pre></td>
     <td align="left" class="src coveredLine"><pre>	prio_queue[prio].length--;</pre></td>
     </tr>
 
     <tr>
     <td align="right" class="lineno"><pre>309</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>456</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>306</pre></td>
     <td align="left" class="src coveredLine"><pre>	return(TRUE);</pre></td>
     </tr>
 
@@ -2472,7 +2472,7 @@
     <tr>
     <td align="right" class="lineno"><pre>311</pre></td>
     <td align="right" class="linebranch"></td>
-    <td align="right" class="linecount coveredLine"><pre>429</pre></td>
+    <td align="right" class="linecount coveredLine"><pre>139</pre></td>
     <td align="left" class="src coveredLine"><pre>    else return(FALSE);</pre></td>
     </tr>
 

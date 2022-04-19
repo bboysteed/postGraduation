@@ -61,7 +61,7 @@ def createPopulation(self):
 #gcovr -r . --html --html-details -o coverage.html
 def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=16, prob_mut=0.5)
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=20, prob_mut=0.5)
     visited_state_addr = []
     best_points, best_distance = ga_tsp.run(target_ = target,visited_addr = visited_state_addr)
     print(best_points,best_distance)

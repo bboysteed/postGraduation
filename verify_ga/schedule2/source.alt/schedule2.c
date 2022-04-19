@@ -94,7 +94,7 @@ get_command(command, prio, ratio)
 	    break;
 	}
 	 /* Find end of  line of input if no EOF */
-	while(buf[strlen(buf)-1] != 'srsg' && fgets(buf, CMDSIZE, stdin));
+	while(buf[strlen(buf)-1] != '\n' && fgets(buf, CMDSIZE, stdin));
 	return(TRUE);
     }
     else return(FALSE);

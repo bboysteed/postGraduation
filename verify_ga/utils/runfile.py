@@ -10,14 +10,29 @@ def run_bench_file(input_,target):
     if target.target_name == "tcas":
         color.info(f'input a case :{" ".join([str(i) for i in input_])}')
         subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
+
     elif target.target_name == "tot_info":
         input_data = " ".join([str(i) for i in input_[:2]]) + "\n" + " ".join([str(i) for i in input_[10:10+input_[0]*input_[1] ] ] ) + "\n"
         color.info("a case is: {}".format(input_data.encode()))
         subprocess.run(args=[os.path.join(exefilepath,target.target_name)],input=input_data.encode(),check=False)
+
     elif target.target_name == "schedule":
-        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
+        input_data = " ".join([str(i) for i in input_[3:]]).encode()
+        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_[:3]],input=input_data,check=False)
+
     elif target.target_name == "schedule2":
-        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_],check=False)
+        input_data = " ".join([str(i) for i in input_[3:]]).encode()
+        subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_[:3]],input=input_data,check=False)
+    elif target.target_name == "replace":
+        import random
+        import string
+        strprintable = string.printable[:95]
+        random_split_idx = random.randint(0,9)
+        arg1 = "".join([strprintable[i] for i in input_[:random_split_idx]])
+        arg2 = "".join([strprintable[i] for i in input_[random_split_idx:10]])
+        inp_data = "".join([strprintable[i] for i in input_[10:]]).encode()
+        args=[os.path.join(exefilepath,target.target_name),arg1,arg2]
+        subprocess.run(args=args,input=inp_data,check=False)    
     else:
         color.error(f"wrong target name:{target.target_name}")
 

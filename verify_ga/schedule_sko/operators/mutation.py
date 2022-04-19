@@ -86,7 +86,7 @@ def mut(individual):
 
 
 def mut_schedule(individual):
-    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/20))
+    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/10))
     for idx in idxs:
         print("&&&&&&&&&&&&&&&&",individual[idx])
         if  0<individual[idx]<1:

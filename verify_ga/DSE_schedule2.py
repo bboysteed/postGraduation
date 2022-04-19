@@ -118,13 +118,13 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                     float_num = self.state.globals['case'][self.state.globals['idx']]
                     color.warning(f"float_num is:{float_num}")
                     self.state.globals['idx']+=1
-                    self.state.memory.store(param0,int(int_num))
+                    self.state.memory.store(param0,int(int_num),endness=project.arch.memory_endness)
                     self.state.memory.store(param1,claripy.FPV(float(float_num),sort=self.state.solver.fp.FSORT_FLOAT))
 
                 
             else:
                 if b"%d" in format_str and b"%f" not in format_str:
-                    num = int(random.randint(1,3))
+                    num = int(random.randint(1,4))
                     # num = 1
                     color.error(f"num is {num}")
                     random_scanf_num.append(num)
@@ -138,7 +138,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                     self.state.memory.store(param0,claripy.FPV(num,sort=self.state.solver.fp.FSORT_FLOAT))
                     return 1
                 elif b"%d%f" in format_str:
-                    int_num = random.randint(1,3)
+                    int_num = random.randint(1,4)
                     float_num = random.random()
                     random_scanf_num.append(int_num)
                     random_scanf_num.append(float_num)
@@ -158,7 +158,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
             # self.state.solver.add(scanf0>48,scanf0<58)
             # self.state.solver.add(scanf1>48,scanf1<58)
             # scanf0_address = param0
-            self.state.memory.store(address, b'xxxxx\n', endness=project.arch.memory_endness)
+            self.state.memory.store(address, b'xxxxx', endness=project.arch.memory_endness)
             # self.state.memory.store(address, scanf0.concat(b' ',scanf1,b'\n'), endness=project.arch.memory_endness)
             # scanf1_address = param1
             # self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
@@ -185,9 +185,12 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         initial_state.globals['idx'] = 3
         initial_state.globals['concrect'] = 1
     
-        while len(simulation.stashes['active'])>0 :
-            print("active length:",len(simulation.stashes['active']))
+        while simulation.active:
+            simulation.step()
+
+            print("active length:",len(simulation.active))
             for state in simulation.active:
+                # print(case)
                 print("constrains length is",len(state.solver.constraints))
                 color.info(f"this state's idx is: {state.globals['idx']}")
                 if state.addr not in visited_state_addr:
@@ -200,7 +203,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                 # print("active state input:  ",state.posix.dumps(0))
                 print("active state output:  ",state.posix.dumps(1))
             #  print(simulation.stashes)
-            simulation.step()
+            # print(simulation.stashes)
         color.warning(f"visited addr length is:{len(visited_state_addr)}")
 
     color.success(f"DSE store all visited state address:{visited_state_addr}")
@@ -238,8 +241,8 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                 color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
                 new_states.append(state)
                 visited_state_addr.append(state.addr)
-
         simulation.step()
+
         if len(new_states)>0:
             break
     if simulation.unsat:

@@ -61,9 +61,9 @@ def createPopulation(self):
 #gcovr -r . --html --html-details -o coverage.html
 def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=4, max_iter=14, prob_mut=0.5)
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=6, max_iter=14, prob_mut=0.5)
     visited_state_addr = []
-    best_points, best_distance = ga_tsp.run(target_ = target,visited_addr = visited_state_addr)
+    best_points, best_distance = ga_tsp.run(target_=target,visited_addr=visited_state_addr)
     print(best_points,best_distance)
     println(ga_tsp.all_old_chrom)
     print(len(ga_tsp.all_old_chrom))
@@ -91,7 +91,7 @@ def main():
             is_symbol_show=True,
             label_opts=opts.LabelOpts(is_show=True),
         )
-        .render(os.path.join(target.target_exe_path,f"results_{target.target_name}1.html"))
+        .render(os.path.join(target.target_exe_path,f"results_{target.target_name}.html"))
     )
 
 if __name__ == '__main__':
