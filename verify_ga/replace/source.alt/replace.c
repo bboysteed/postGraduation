@@ -363,6 +363,7 @@ omatch(lin, i, pat, j)
 		     advance = 0;
 		 break ;
 	     case CCL:
+		 	printf("get [");
 		 if (locate(lin[*i], pat, j + 1))
 		     advance = 1;	
 		 break ;
@@ -511,16 +512,26 @@ char *pat, *sub;
     bool result;
     
     result = getline_(line, MAXSTR);
-    while ((result)) {
+	printf("get line->%s",line);
+	//原版本循环处理，这里的话简化为执行一次
+    // while ((result)) {
+	// subline(line, pat, sub);
+	// result = getline_(line, MAXSTR);
+    // }
+	if ((result)) {
 	subline(line, pat, sub);
-	result = getline_(line, MAXSTR);
-    }
+    }else{
+		printf("getline get nothing!");
+	}
 }
 
 main(argc, argv)
 int	argc;
 char	*argv[];
 {
+
+	printf("argv[1]->%s\n",argv[1]);
+	printf("argv[2]->%s\n",argv[2]);
    string pat, sub;
    bool result;
 

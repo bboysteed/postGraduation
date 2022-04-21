@@ -25,7 +25,8 @@ def format_cases(cases):
     printables_str = string.printable[:95]
     new_cases = []
     for case in cases:
-        random_idx = random.randint(0,9)
+        # random_idx = random.randint(0,9)
+        random_idx = 5
         arg1 = "".join([printables_str[i] for i in case[:random_idx]])
         arg2 = "".join([printables_str[i] for i in case[random_idx:10]])
         input_data = "".join([printables_str[i] for i in case[10:]]).encode()
@@ -162,7 +163,25 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
             # self.state.solver.add(scanf0>48,scanf0<58)
             # self.state.solver.add(scanf1>48,scanf1<58)
             # scanf0_address = param0
-            self.state.memory.store(address, b'xxxxx', endness=project.arch.memory_endness)
+            value = self.state.globals['case'][2]
+            self.state.memory.store(address, value, endness=project.arch.memory_endness)
+            # self.state.memory.store(address, scanf0.concat(b' ',scanf1,b'\n'), endness=project.arch.memory_endness)
+            # scanf1_address = param1
+            # self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
+
+            return 1
+    class ReplacementFputc(angr.SimProcedure):
+    # Finish the parameters to the scanf function. Hint: 'scanf("%u %u", ...)'.
+    # (!)
+        def run(self, address,file_dp):
+            # scanf0 = claripy.BVS('scanf0', 8)
+            # scanf1 = claripy.BVS('scanf1', 8)
+            # self.state.solver.add(scanf0>48,scanf0<58)
+            # self.state.solver.add(scanf1>48,scanf1<58)
+            # scanf0_address = param0
+            # value = self.state.memory.load(address,1)
+            # _str = self.state.solver.eval(value,cast_to=bytes)
+            # color.error(_str)
             # self.state.memory.store(address, scanf0.concat(b' ',scanf1,b'\n'), endness=project.arch.memory_endness)
             # scanf1_address = param1
             # self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
@@ -170,7 +189,8 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
             return 1
     # project.hook_symbol('__isoc99_fscanf', ReplacementFscanf())
     # project.hook_symbol('__isoc99_sscanf', ReplacementSscanf())
-    # project.hook_symbol('fgets', ReplacementFgets())
+    project.hook_symbol('fgets', ReplacementFgets())
+    project.hook_symbol('fputc', ReplacementFputc())
 
     
 
@@ -183,10 +203,11 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         color.info(f"concrect case is: {case}")
         initial_state = project.factory.full_init_state(
             args=[path_to_binary,case[0],case[1]],
-            input = SimFileStream(name='stdin',content=case[2],has_end=True)
+            # input = SimFileStream(name='stdin',content=case[2]+b'\n',has_end=True)
+            # stdin = case[2]+b'\n'
         )
         simulation = project.factory.simgr(initial_state)
-        # initial_state.globals['case'] = case
+        initial_state.globals['case'] = case
         # initial_state.globals['idx'] = 3
         # initial_state.globals['concrect'] = 1
     
@@ -195,20 +216,21 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
 
             print("active length:",len(simulation.active))
             for state in simulation.active:
-                # print(case)
+                print(case)
                 print("constrains length is",len(state.solver.constraints))
                 # color.info(f"this state's idx is: {state.globals['idx']}")
                 if state.addr not in visited_state_addr:
                     visited_state_addr.append(state.addr)
                     visited_state.append(state)
-                def dd(state):
-                    # color.error(f"随机数长度-->{len(random_scanf_num)}")
-                    return len(state.solver.constraints) > 80
-                simulation.drop(filter_func=dd)
+                # def dd(state):
+                #     # color.error(f"随机数长度-->{len(random_scanf_num)}")
+                #     return len(state.solver.constraints) > 80
+                # simulation.drop(filter_func=dd)
                 # print("active state input:  ",state.posix.dumps(0))
                 print("active state output:  ",state.posix.dumps(1))
+                print("visited length:  ",len(visited_addr))
             #  print(simulation.stashes)
-            # print(simulation.stashes)
+                print("active length is",len(simulation.active))
         color.warning(f"visited addr length is:{len(visited_state_addr)}")
 
     color.success(f"DSE store all visited state address:{visited_state_addr}")
@@ -219,21 +241,21 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
     # exit(0)
 
     # 2.进行符号执行，获取新的状态地址
-    arg1 = [claripy.BVS(f'ch_{i}', 8) for i in range(6)] 
-    arg2 = [claripy.BVS(f'ch_{i}', 8) for i in range(4)] 
-    stdin = [claripy.BVS(f'stdin_{i}', 8)for i in range(30)] 
+    arg1 = [claripy.BVS(f'ch_{i}', 8) for i in range(5)] 
+    arg2 = [claripy.BVS(f'ch_{i}', 8) for i in range(5)] 
+    stdin = [claripy.BVS(f'stdin_{i}', 8)for i in range(20)] 
     # v2 = claripy.BVS('v2', 24)
     # v3 = claripy.BVS('v3', 8)
     
     initial_state = project.factory.entry_state(
         args=[path_to_binary,claripy.Concat(*arg1),claripy.Concat(*arg2)],
         # input=claripy.Concat(*flags+[claripy.BVV(b'\n')])
-        input=SimFileStream('stdin',content=claripy.Concat(*stdin),has_end=True)
+        stdin=SimFileStream('stdin',content=claripy.Concat(*stdin+[b'\n']),has_end=True)
     )
     for i in stdin:
-        initial_state.solver.add(i>0x20,i<0x7e)
+        initial_state.solver.add(i>=0x20,i<0x7e)
     for i in arg1+arg2:
-        initial_state.solver.add(i>0x20,i<0x7e)
+        initial_state.solver.add(i>=0x20,i<0x7e)
     simulation = project.factory.simgr(initial_state)
     # initial_state.globals['concrect'] = 0
     # initial_state.globals['scanf_solutions'] = []
@@ -255,10 +277,10 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                 ans3 += state.solver.eval(i,cast_to=bytes)
             print("ans3:",ans3)
             # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
-            def dd(state):
-                # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
-                return len(state.solver.constraints) > 100
-            simulation.drop(filter_func=dd)
+            # def dd(state):
+            #     # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
+            #     return len(state.solver.constraints) > 100
+            # simulation.drop(filter_func=dd)
             print("active state output:  ",state.posix.dumps(1))
             if state.addr not in visited_state_addr:
                 color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
@@ -266,7 +288,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                 visited_state_addr.append(state.addr)
         simulation.step()
 
-        if len(new_states)>5:
+        if len(new_states)>0:
             break
     # exit(0)
     print(simulation.stashes)

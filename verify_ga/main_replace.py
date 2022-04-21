@@ -1,6 +1,6 @@
 #!/home/steed/.virtualenvs/ga_env/bin/python
 from mimetypes import init
-from re import T
+import pandas as pd
 import numpy as np
 import pyecharts.options as opts
 from pyecharts.charts import Line
@@ -56,31 +56,23 @@ def createPopulation(self):
     print(self.size_pop, self.len_chrom)
     # 前10位表示arg1 arg2的索引，随机拆分；
     # 后90位表示输入的内容的索引
-    tmp1 = np.random.randint(0,95,[self.size_pop, 100])
+    tmp1 = np.random.randint(0,95,[self.size_pop, 30])
     # tmp2 = np.random.randint(1,8,[self.size_pop, 20])
     self.Chrom = tmp1
 
     # self.allChrom += self.Chrom
     return self.Chrom
 #gcovr -r . --html --html-details -o coverage.html
-def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=4, max_iter=80, prob_mut=0.5)
-    visited_state_addr = []
-    best_points, best_distance = ga_tsp.run(target_ = target,visited_addr = visited_state_addr)
-    print(best_points,best_distance)
-    println(ga_tsp.all_old_chrom)
-    print(len(ga_tsp.all_old_chrom))
 
-    y_data = [round(float(i),2) for i in ga_tsp.generation_best_Y]
-    x_data = np.linspace(1,len(y_data),len(y_data))
 
+def plot_chart(x_data,y_data):
 
     (
         Line()
         .set_global_opts(
             tooltip_opts=opts.TooltipOpts(is_show=True),
-            xaxis_opts=opts.AxisOpts(type_="category"),
+            xaxis_opts=opts.AxisOpts(type_="value"),
             yaxis_opts=opts.AxisOpts(
                 type_="value",
                 axistick_opts=opts.AxisTickOpts(is_show=True),
@@ -95,8 +87,26 @@ def main():
             is_symbol_show=True,
             label_opts=opts.LabelOpts(is_show=True),
         )
-        .render(os.path.join(target.target_exe_path,f"results_{target.target_name}1.html"))
+        .render(os.path.join(target.target_exe_path,f"results_{target.target_name}.html"))
     )
 
+def main():    
+
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=4, max_iter=40, prob_mut=0.5)
+    visited_state_addr = []
+    best_points, best_distance = ga_tsp.run(target_ = target,visited_addr = visited_state_addr)
+    print(best_points,best_distance)
+    println(ga_tsp.all_old_chrom)
+    print(len(ga_tsp.all_old_chrom))
+
+
+    y_data = [round(float(i),2) for i in ga_tsp.generation_best_Y]
+    x_data = np.linspace(1,len(y_data),len(y_data))
+    
+    df = pd.DataFrame(index=x_data,data=y_data,columns=["代码行覆盖率"])
+    df.to_excel(os.path.join(target.target_exe_path,f"{target.target_name}.xlsx"))
+    plot_chart(x_data=x_data,y_data=y_data)
+
+   
 if __name__ == '__main__':
     main()

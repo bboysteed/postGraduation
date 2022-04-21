@@ -1,16 +1,15 @@
 
 
+# include <stdio.h>
+# include "tokens.h"
+
 # include <ctype.h>
-#include "stream.h"
+// # include "stream.h"
 # define START  5
 # define TRUE  1
 # define FALSE 0
 
-typedef int BOOLEAN;
-typedef char *string;
 
-# include <stdio.h>
-# include "tokens.h"
 
 static token numeric_case();
 static token error_or_eof_case();
@@ -36,9 +35,9 @@ char *argv[];
       }
       stream_ptr=open_token_stream(argv[1]);
 
-      while(!is_eof_token((token_ptr=get_token(stream_ptr))))
+      if(!is_eof_token((token_ptr=get_token(stream_ptr))))
                 print_token(token_ptr);
-      print_token(token_ptr);
+    //   print_token(token_ptr);
   exit(0);
 }
 
@@ -203,6 +202,7 @@ token_stream tstream_ptr;
 	      return(error_or_eof_case(tstream_ptr, 
 				       token_ptr,cu_state,token_str,token_ind,ch));
 	  } else if (next_st == -2) {/* This is numeric case. */
+            printf("ARRIVE1");
 	      return(numeric_case(tstream_ptr,token_ptr,ch,
 				  token_str,token_ind));
 	  } else if (next_st == -3) {/* This is the IDENTIFIER case */

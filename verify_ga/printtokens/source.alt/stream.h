@@ -3,8 +3,11 @@
     PURPOSE   : This is the header file for stream.c . This inlcudes
                 the type definitions which are to be exported to the
                 other routines.
-  * **************************************************************** */
 
+  * **************************************************************** */
+# include "stdio.h"
+typedef int BOOLEAN;
+typedef char *string;
 typedef struct stream_type {
                                FILE *fp;  /* File pointer to stream */
                                int  stream_ind; /* buffer index */

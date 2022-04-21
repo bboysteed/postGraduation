@@ -4,6 +4,9 @@
         "gamma.h": "c",
         "cmath": "c",
         "std.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "cstdio": "c",
+        "stream.h": "c",
+        "tokens.h": "c"
     }
 }
