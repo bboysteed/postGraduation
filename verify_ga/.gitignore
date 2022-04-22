@@ -3,7 +3,9 @@
 **/outputs
 **/testplans
 **/testplans.alt
-**/trace
+**/traces
 **/info
 **/source
+**/__pycache__
+**/versions
 
