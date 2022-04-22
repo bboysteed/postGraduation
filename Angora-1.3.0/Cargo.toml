@@ -1,0 +1,12 @@
+[workspace]
+members = [
+        "common",
+        "fuzzer",
+        "runtime_fast",
+        "runtime",
+]
+
+[net]
+retry = 2                   # network retries
+git-fetch-with-cli = true   # use the `git` executable for git operations
+offline = true  
