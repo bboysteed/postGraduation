@@ -1,1 +1,9 @@
-.vscode/
+/.vscode
+**/inputs
+**/outputs
+**/testplans
+**/testplans.alt
+**/trace
+**/info
+**/source
+
