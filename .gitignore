@@ -1,4 +1,4 @@
-/.vscode
+**/.vscode
 **/inputs
 **/outputs
 **/testplans
@@ -8,4 +8,5 @@
 **/source
 **/__pycache__
 **/versions
-
+.idea
+.vscode

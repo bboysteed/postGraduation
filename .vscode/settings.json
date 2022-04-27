@@ -8,5 +8,6 @@
         "cstdio": "c",
         "stream.h": "c",
         "tokens.h": "c"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
