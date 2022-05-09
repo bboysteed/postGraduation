@@ -1,3 +1,4 @@
+import string
 from calendar import c
 import random
 from re import A, T
@@ -15,11 +16,12 @@ import random
 import logging
 
 from pip import main
-logging.getLogger('angr.manager').setLevel(logging.INFO) #用来记录日志
+logging.getLogger('angr.manager').setLevel(logging.INFO)  # 用来记录日志
 
 color = pycui()
 random_scanf_num = []
-import string
+
+
 def format_cases(cases):
     # print(cases)
     printables_str = string.printable[:95]
@@ -32,22 +34,23 @@ def format_cases(cases):
         input_data = "".join([printables_str[i] for i in case[10:]]).encode()
         # print(r,c)
         # print(case)
-        new_cases.append([arg1,arg2,input_data])
+        new_cases.append([arg1, arg2, input_data])
     return new_cases
 
 
 # from angr.procedures.stubs.format_parser import ScanfFormatParser
 
-def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_addr):
-    path_to_binary = os.path.join(target.target_exe_path,target.target_name)
-    project = angr.Project(path_to_binary)
+def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_addr):
+    path_to_binary = os.path.join(target.target_exe_path, target.target_name)
+    project = angr.Project(path_to_binary, load_options={
+                           'auto_load_libs': False})
 
     class ReplacementFscanf(angr.SimProcedure):
-        def run(self, ptr,format_string_ptr, param0):
+        def run(self, ptr, format_string_ptr, param0):
             scanf0_address = param0
             a = self.state.memory.load(format_string_ptr, 2)
-                # print(a)
-            format_str = self.state.solver.eval(a,cast_to=bytes)
+            # print(a)
+            format_str = self.state.solver.eval(a, cast_to=bytes)
             # def drop_state(state):
             #     if "idx" in state.globals.keys():
             #         return state.globals['idx'] > 19
@@ -59,121 +62,139 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                 if self.state.globals['idx'] >= 23:
                     passed_num = 0x0a
                     self.state.memory.store(scanf0_address, passed_num)
-                    return 
+                    return
                 else:
                     passed_num = self.state.globals['case'][self.state.globals['idx']]
                 # color.info(f"[x] scanf get num: {passed_num}")
                 if format_str == b'%f':
-                    self.state.memory.store(scanf0_address, claripy.FPV(float(passed_num),sort=self.state.solver.fp.FSORT_FLOAT))
+                    self.state.memory.store(scanf0_address, claripy.FPV(
+                        float(passed_num), sort=self.state.solver.fp.FSORT_FLOAT))
 
                 if format_str == b'%d':
-                    self.state.memory.store(scanf0_address,claripy.BVV(int(passed_num),8), endness=project.arch.memory_endness)
-                self.state.globals['idx']+=1
-                
+                    self.state.memory.store(scanf0_address, claripy.BVV(
+                        int(passed_num), 8), endness=project.arch.memory_endness)
+                self.state.globals['idx'] += 1
+
             else:
-                color.error(f"长度--{len(self.state.globals['scanf_solutions'])}")
+                color.error(
+                    f"长度--{len(self.state.globals['scanf_solutions'])}")
                 num = 0
                 # color.error(format_string_ptr)
 
                 if format_str == b'%f':
                     num = random.random()
-                    self.state.memory.store(scanf0_address, claripy.FPV(num,sort=self.state.solver.fp.FSORT_FLOAT))
+                    self.state.memory.store(scanf0_address, claripy.FPV(
+                        num, sort=self.state.solver.fp.FSORT_FLOAT))
 
                 if format_str == b'%d':
-                    num = random.randint(1,3)
+                    num = random.randint(1, 3)
                     # num = claripy.BVS("num")
-                    self.state.memory.store(scanf0_address, claripy.BVV(num,8))
+                    self.state.memory.store(
+                        scanf0_address, claripy.BVV(num, 8))
                 random_scanf_num.append(num)
 
                 if not self.state.globals['scanf_solutions']:
                     self.state.globals['scanf_solutions'] = [num]
                 else:
                     self.state.globals['scanf_solutions'].append(num)
-                
+
             # scanf1_address = param1
             # self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
-            
+
             return 1
+
     class ReplacementSscanf(angr.SimProcedure):
-        def run(self, ptr,format_string_ptr, param0,param1):
+        def run(self, ptr, format_string_ptr, param0, param1):
             # simulation.drop(lambda x:x.globals['idx']>=23)
             a = self.state.memory.load(format_string_ptr, 30)
-            color.warning(f"split before format_str is {self.state.solver.eval(a,cast_to=bytes)}")
-            format_str = self.state.solver.eval(a,cast_to=bytes).split(b'\x00')[0]
+            color.warning(
+                f"split before format_str is {self.state.solver.eval(a,cast_to=bytes)}")
+            format_str = self.state.solver.eval(
+                a, cast_to=bytes).split(b'\x00')[0]
             color.warning(f"format_str is {format_str}")
             if self.state.globals['concrect'] == 1:
                 color.info("进入具体执行...")
                 if b"%d" in format_str and b"%f" not in format_str:
                     num = self.state.globals['case'][self.state.globals['idx']]
                     color.warning(f"num is:{num}")
-                    self.state.globals['idx']+=1
-                    self.state.memory.store(param0,int(num),endness=project.arch.memory_endness)
+                    self.state.globals['idx'] += 1
+                    self.state.memory.store(param0, int(
+                        num), endness=project.arch.memory_endness)
                     return 1
                 elif b"%f" in format_str and b"%d" not in format_str:
                     num = self.state.globals['case'][self.state.globals['idx']]
                     color.warning(f"num is:{num}")
 
-                    self.state.globals['idx']+=1                   
-                    self.state.memory.store(param0,claripy.FPV(float(num),sort=self.state.solver.fp.FSORT_FLOAT))
+                    self.state.globals['idx'] += 1
+                    self.state.memory.store(param0, claripy.FPV(
+                        float(num), sort=self.state.solver.fp.FSORT_FLOAT))
                     return 1
                 elif b"%d%f" in format_str:
                     int_num = self.state.globals['case'][self.state.globals['idx']]
                     color.warning(f"int_num is:{int_num}")
-                    self.state.globals['idx']+=1
+                    self.state.globals['idx'] += 1
                     float_num = self.state.globals['case'][self.state.globals['idx']]
                     color.warning(f"float_num is:{float_num}")
-                    self.state.globals['idx']+=1
-                    self.state.memory.store(param0,int(int_num),endness=project.arch.memory_endness)
-                    self.state.memory.store(param1,claripy.FPV(float(float_num),sort=self.state.solver.fp.FSORT_FLOAT))
+                    self.state.globals['idx'] += 1
+                    self.state.memory.store(param0, int(
+                        int_num), endness=project.arch.memory_endness)
+                    self.state.memory.store(param1, claripy.FPV(
+                        float(float_num), sort=self.state.solver.fp.FSORT_FLOAT))
 
-                
             else:
                 if b"%d" in format_str and b"%f" not in format_str:
-                    num = int(random.randint(1,4))
+                    num = int(random.randint(1, 4))
                     # num = 1
                     color.error(f"num is {num}")
                     random_scanf_num.append(num)
-                    self.state.memory.store(param0,int(num),endness=project.arch.memory_endness)
+                    self.state.memory.store(param0, int(
+                        num), endness=project.arch.memory_endness)
 
                     return 1
                 elif b"%f" in format_str and b"%d" not in format_str:
                     num = random.random()
                     random_scanf_num.append(num)
 
-                    self.state.memory.store(param0,claripy.FPV(num,sort=self.state.solver.fp.FSORT_FLOAT))
+                    self.state.memory.store(param0, claripy.FPV(
+                        num, sort=self.state.solver.fp.FSORT_FLOAT))
                     return 1
                 elif b"%d%f" in format_str:
-                    int_num = random.randint(1,4)
+                    int_num = random.randint(1, 4)
                     float_num = random.random()
                     random_scanf_num.append(int_num)
                     random_scanf_num.append(float_num)
                     # store_nums = [int_num,float_num]
-                    self.state.memory.store(param0,int(int_num),endness=project.arch.memory_endness)
-                    self.state.memory.store(param1,claripy.FPV(float_num,sort=self.state.solver.fp.FSORT_FLOAT))
+                    self.state.memory.store(param0, int(
+                        int_num), endness=project.arch.memory_endness)
+                    self.state.memory.store(param1, claripy.FPV(
+                        float_num, sort=self.state.solver.fp.FSORT_FLOAT))
                     return 2
             # color.warning(f"format_str is {format_str}")
             # exit(0)
             # return 2
+
     class ReplacementFgets(angr.SimProcedure):
-    # Finish the parameters to the scanf function. Hint: 'scanf("%u %u", ...)'.
-    # (!)
-        def run(self, address,size,file_dp):
+        # Finish the parameters to the scanf function. Hint: 'scanf("%u %u", ...)'.
+        # (!)
+        def run(self, address, size, file_dp):
             # scanf0 = claripy.BVS('scanf0', 8)
             # scanf1 = claripy.BVS('scanf1', 8)
             # self.state.solver.add(scanf0>48,scanf0<58)
             # self.state.solver.add(scanf1>48,scanf1<58)
             # scanf0_address = param0
             value = self.state.globals['case'][2]
-            self.state.memory.store(address, value, endness=project.arch.memory_endness)
+            self.state.memory.store(
+                address, value, endness=project.arch.memory_endness)
             # self.state.memory.store(address, scanf0.concat(b' ',scanf1,b'\n'), endness=project.arch.memory_endness)
             # scanf1_address = param1
             # self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
 
             return 1
+
     class ReplacementFputc(angr.SimProcedure):
-    # Finish the parameters to the scanf function. Hint: 'scanf("%u %u", ...)'.
-    # (!)
-        def run(self, address,file_dp):
+        # Finish the parameters to the scanf function. Hint: 'scanf("%u %u", ...)'.
+        # (!)
+        def run(self, address, file_dp):
             # scanf0 = claripy.BVS('scanf0', 8)
             # scanf1 = claripy.BVS('scanf1', 8)
             # self.state.solver.add(scanf0>48,scanf0<58)
@@ -192,17 +213,15 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
     project.hook_symbol('fgets', ReplacementFgets())
     project.hook_symbol('fputc', ReplacementFputc())
 
-    
-
     cases = format_cases(pass_cases_)
     # 1.进行具体执行
     print(cases)
     visited_state_addr = visited_addr
-    visited_state = []
+    # visited_state = []
     for case in cases:
         color.info(f"concrect case is: {case}")
         initial_state = project.factory.full_init_state(
-            args=[path_to_binary,case[0],case[1]],
+            args=[path_to_binary, case[0], case[1]],
             # input = SimFileStream(name='stdin',content=case[2]+b'\n',has_end=True)
             # stdin = case[2]+b'\n'
         )
@@ -210,113 +229,117 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         initial_state.globals['case'] = case
         # initial_state.globals['idx'] = 3
         # initial_state.globals['concrect'] = 1
-    
+
         while simulation.active:
             simulation.step()
 
-            print("active length:",len(simulation.active))
+            print("active length:", len(simulation.active))
             for state in simulation.active:
-                print(case)
-                print("constrains length is",len(state.solver.constraints))
+                # print(case)
+                print("constrains length is", len(state.solver.constraints))
                 # color.info(f"this state's idx is: {state.globals['idx']}")
                 if state.addr not in visited_state_addr:
                     visited_state_addr.append(state.addr)
-                    visited_state.append(state)
+                    # visited_state.append(state)
                 # def dd(state):
                 #     # color.error(f"随机数长度-->{len(random_scanf_num)}")
                 #     return len(state.solver.constraints) > 80
                 # simulation.drop(filter_func=dd)
                 # print("active state input:  ",state.posix.dumps(0))
-                print("active state output:  ",state.posix.dumps(1))
-                print("visited length:  ",len(visited_addr))
+                print("active state output:  ", state.posix.dumps(1))
+                print("visited length:  ", len(visited_addr))
             #  print(simulation.stashes)
-                print("active length is",len(simulation.active))
+                print("active length is", len(simulation.active))
         color.warning(f"visited addr length is:{len(visited_state_addr)}")
 
     color.success(f"DSE store all visited state address:{visited_state_addr}")
-    color.success(f"all visited state address length is:{len(visited_state_addr)}")
+    color.success(
+        f"all visited state address length is:{len(visited_state_addr)}")
     # # print(simulation.deadended[0].posix.dumps(0))
     # # print(simulation.deadended[0].posix.dumps(1))
-    # # 
+    # #
     # exit(0)
 
     # 2.进行符号执行，获取新的状态地址
-    arg1 = [claripy.BVS(f'ch_{i}', 8) for i in range(5)] 
-    arg2 = [claripy.BVS(f'ch_{i}', 8) for i in range(5)] 
-    stdin = [claripy.BVS(f'stdin_{i}', 8)for i in range(20)] 
+    arg1 = [claripy.BVS(f'ch_{i}', 8) for i in range(5)]
+    arg2 = [claripy.BVS(f'ch_{i}', 8) for i in range(5)]
+    stdin = [claripy.BVS(f'stdin_{i}', 8)for i in range(20)]
     # v2 = claripy.BVS('v2', 24)
     # v3 = claripy.BVS('v3', 8)
-    
+
     initial_state = project.factory.entry_state(
-        args=[path_to_binary,claripy.Concat(*arg1),claripy.Concat(*arg2)],
+        args=[path_to_binary, claripy.Concat(*arg1), claripy.Concat(*arg2)],
         # input=claripy.Concat(*flags+[claripy.BVV(b'\n')])
-        stdin=SimFileStream('stdin',content=claripy.Concat(*stdin+[b'\n']),has_end=True)
+        stdin=claripy.Concat(*stdin)
     )
     for i in stdin:
-        initial_state.solver.add(i>=0x20,i<0x7e)
+        initial_state.solver.add(i >= 0x20, i < 0x7e)
     for i in arg1+arg2:
-        initial_state.solver.add(i>=0x20,i<0x7e)
-    simulation = project.factory.simgr(initial_state)
+        initial_state.solver.add(i >= 0x20, i < 0x7e)
+    simulation = project.factory.simgr(initial_state,)
+
     # initial_state.globals['concrect'] = 0
     # initial_state.globals['scanf_solutions'] = []
     new_states = []
     while simulation.active:
         for state in simulation.active:
-            print("constrains length is",len(state.solver.constraints))
-            print("active state input:  ",state.posix.dumps(0))
+            print("constrains length is", len(state.solver.constraints))
+            print("active state input:  ", state.posix.dumps(0))
             ans1 = b""
             for i in arg1:
-                ans1 += state.solver.eval(i,cast_to=bytes)
-            print("ans1:",ans1)
+                ans1 += state.solver.eval(i, cast_to=bytes)
+            print("ans1:", ans1)
             ans2 = b""
             for i in arg2:
-                ans2 += state.solver.eval(i,cast_to=bytes)
-            print("ans2:",ans2)
+                ans2 += state.solver.eval(i, cast_to=bytes)
+            print("ans2:", ans2)
             ans3 = b""
             for i in stdin:
-                ans3 += state.solver.eval(i,cast_to=bytes)
-            print("ans3:",ans3)
+                ans3 += state.solver.eval(i, cast_to=bytes)
+            print("ans3:", ans3)
             # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
             # def dd(state):
             #     # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
             #     return len(state.solver.constraints) > 100
             # simulation.drop(filter_func=dd)
-            print("active state output:  ",state.posix.dumps(1))
+            print("active state output:  ", state.posix.dumps(1))
             if state.addr not in visited_state_addr:
-                color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
+                color.success(
+                    f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
                 new_states.append(state)
                 visited_state_addr.append(state.addr)
         simulation.step()
 
-        if len(new_states)>0:
-            break
+        # if len(new_states) > 10:
+        # break
     # exit(0)
     print(simulation.stashes)
     if simulation.unsat:
         print(simulation.unsat[0].solver.constraints)
     if not new_states:
         color.warning("no more state found!!!")
+        print(simulation.stashes)
         import time
         time.sleep(3)
     new_DSE_cases = []
     for new_st in new_states:
-        print("active state input:  ",new_st.posix.dumps(0))
-        print("active state output:  ",new_st.posix.dumps(1))
+        print("active state input:  ", new_st.posix.dumps(0))
+        print("active state output:  ", new_st.posix.dumps(1))
         ans1 = b""
         for i in arg1:
-            ans1 += state.solver.eval(i,cast_to=bytes)
-        print("ans1:",ans1)
+            ans1 += state.solver.eval(i, cast_to=bytes)
+        print("ans1:", ans1)
         ans2 = b""
         for i in arg2:
-            ans2 += state.solver.eval(i,cast_to=bytes)
-        print("ans2:",ans2)
+            ans2 += state.solver.eval(i, cast_to=bytes)
+        print("ans2:", ans2)
         ans3 = b""
         for i in stdin:
-            ans3 += state.solver.eval(i,cast_to=bytes)
-        print("ans3:",ans3)
-  
-        new_DSE_cases.append([ans1.decode(),ans2.decode(),ans3])
-    # exit(0)    
+            ans3 += state.solver.eval(i, cast_to=bytes)
+        print("ans3:", ans3)
+
+        new_DSE_cases.append([ans1.decode(), ans2.decode(), ans3.decode()])
+    # exit(0)
     return new_DSE_cases
     # def tmp(state):
     #     color.info(f"active length is:{len(simulation.active)}")
@@ -337,12 +360,12 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
     #         print(tmp)
     #     out = state.posix.dumps(1)
     #     return b'arrive2' in out
-    
+
     # simulation.explore(find=tmp)
     # print("finished simulation:",simulation.stashes)
     # print(len(simulation.found))
     # if simulation.found:
-        # state = simulation.found[0]
+    # state = simulation.found[0]
     #     color.success("[x]found!!!!!!!!")
     #     print("found state input:  ",state.posix.dumps(0))
     #     print("found state input:  ",state.posix.dumps(1))
@@ -360,93 +383,94 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
     # else:
     #     color.error("no found!")
 
-
     # initial_state.globals['concrect'] = 0
     # initial_state.globals['scanf_solutions'] = []
     # initial_state.globals['sscanf_solutions'] = []
     # new_states = []
     # while simulation.active:
-        # for state in simulation.active:
-            # print("active state input:  ",state.posix.dumps(0))
-            # print("active state output:  ",state.posix.dumps(1))
-            # if state.addr not in visited_state_addr:
-                # color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
-                # new_states.append(state)
-        # simulation.step()
-        # if len(new_states)>3:
-            # break
+    # for state in simulation.active:
+    # print("active state input:  ",state.posix.dumps(0))
+    # print("active state output:  ",state.posix.dumps(1))
+    # if state.addr not in visited_state_addr:
+    # color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
+    # new_states.append(state)
+    # simulation.step()
+    # if len(new_states)>3:
+    # break
     # if simulation.unsat:
     #     print(simulation.unsat[0].solver.constraints)
 
-   
+
 if __name__ == "__main__":
     from main_totinfo import Target
-    target = Target(num_points_=32,exe_path_=os.path.join(os.path.abspath(os.path.dirname(__file__)),"schedule2","source.alt"),target_name_="schedule2")   
+    target = Target(num_points_=32, exe_path_=os.path.join(os.path.abspath(
+        os.path.dirname(__file__)), "schedule2", "source.alt"), target_name_="schedule2")
     cases = [
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-[ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "4","4","6","9","7","6","7","6","5","7","1","6","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","8","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "1","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","9","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","5","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","5","7","1","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "4","4","6","9","7","6","7","6","5","7","1","6","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","8","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "1","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","9","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","5","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-# [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
-# [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
-]
-    visited= []
-    pass_cases_to_DSE_and_get_new_case_back_to_GA(cases,target,visited)
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        ["4", "5", "7", "2", "6", "1", "9", "6", "8", "4", "3", "1", "8", "1", "5", "8", "9", "2", "4", "3", "1", "8", "2", "1", "4", "8", "8", "5", "6", "3", "1", "8", "8", "7", "6", "6", "7", "8", "8", "9", "5", "4", "7", "3", "2", "4", "6", "1", "3", "7", "7", "1",
+            "7", "5", "8", "9", "8", "3", "7", "6", "6", "5", "6", "6", "5", "7", "2", "9", "6", "3", "6", "3", "4", "1", "3", "9", "2", "1", "5", "9", "5", "7", "2", "9", "6", "1", "3", "6", "8", "3", "1", "2", "5", "4", "1", "5", "2", "8", "5", "2", "3", "4", "4"],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "4","4","6","9","7","6","7","6","5","7","1","6","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","8","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "1","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","9","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","5","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","5","7","1","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "4","4","6","9","7","6","7","6","5","7","1","6","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","8","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "1","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","9","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","5","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","1","8","1","8","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","5","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","2","7","6","7","6","5","7","1","8","7","1","6","4","2","9","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","1","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","9","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+        # [ "1","4","6","9","7","6","7","6","5","7","1","8","7","1","6","4","2","1","2","1","4","5","3","2","9","9","9","1","6","2","4","8","8","6","2","3","6","3","5","5","7","7","1","4","6","8","2","8","5","1","3","8","5","9","8","5","3","6","5","1","4","4","9","7","6","1","7","8","6","5","3","9","7","1","4","9","4","4","4","1","5","5","5","1","2","7","6","1","1","9","6","7","5","7","5","4","5","4","2","7","6","9","3" ],
+        # [ "4","5","7","2","6","1","9","6","8","4","3","1","8","1","5","8","9","2","4","3","1","8","2","1","4","8","8","5","6","3","1","8","8","7","6","6","7","8","8","9","5","4","7","3","2","4","6","1","3","7","7","1","7","5","8","9","8","3","7","6","6","5","6","6","5","7","2","9","6","3","6","3","4","1","3","9","2","1","5","9","5","7","2","9","6","1","3","6","8","3","1","2","5","4","1","5","2","8","5","2","3","4","4" ],
+    ]
+    visited = []
+    pass_cases_to_DSE_and_get_new_case_back_to_GA(cases, target, visited)

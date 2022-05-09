@@ -24,12 +24,12 @@ def run_bench_file(input_,target):
 
     elif target.target_name == "schedule":
         input_data = " ".join([str(i) for i in input_[3:]]).encode()
-        color.info("case->  ",inp_data)
+        color.info(f"case->  {input_data}")
         subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_[:3]],input=input_data,check=False)
 
     elif target.target_name == "schedule2":
         input_data = " ".join([str(i) for i in input_[3:]]).encode()
-        color.info("case->  ",inp_data)
+        color.info(f"case->  {input_data}")
         subprocess.run(args=[os.path.join(exefilepath,target.target_name)]+[str(i) for i in input_[:3]],input=input_data,check=False)
     elif target.target_name == "replace":
 

@@ -1,4 +1,3 @@
-#!/home/steed/.virtualenvs/ga_env/bin/python
 from mimetypes import init
 import numpy as np
 import pyecharts.options as opts
@@ -71,7 +70,10 @@ def main():
     y_data = [round(float(num),2) for num in ga_tsp.generation_best_Y]
     x_data = np.linspace(1,len(y_data),len(y_data))
 
-
+    import pandas as pd
+    df = pd.DataFrame(index=x_data, data=y_data, columns=["代码行覆盖率"])
+    df.to_excel(os.path.join(target.target_exe_path,
+                f"{target.target_name}no_dse.xlsx"))
     (
         Line()
         .set_global_opts(

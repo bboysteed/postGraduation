@@ -69,7 +69,10 @@ def main():
     y_data = [round(float(n),2) for n in ga_tsp.generation_best_Y]
     x_data = np.linspace(1,len(y_data),len(y_data))
 
-
+    import pandas as pd
+    df = pd.DataFrame(index=x_data, data=y_data, columns=["代码行覆盖率"])
+    df.to_excel(os.path.join(target.target_exe_path,
+                f"{target.target_name}_GA.xlsx"))
     (
         Line()
         .set_global_opts(

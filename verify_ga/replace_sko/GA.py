@@ -12,8 +12,10 @@ from .tools import func_transformer
 from abc import ABCMeta, abstractmethod
 from .operators import crossover, mutation, ranking, selection
 from utils.pycui import *
-import DSE_print_tokens
+import DSE_replace
 import os
+import string
+
 color = pycui()
 
 
@@ -328,12 +330,12 @@ class GA_TSP(GeneticAlgorithmBase):
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()
-            self.selection() #计算累计覆盖率这里不进行选择
+            # self.selection() #计算累计覆盖率这里不进行选择
             self.crossover()
             self.mutation()
 
             # put parent and offspring together and select the best size_pop number of population
-            self.Chrom = np.concatenate([Chrom_old, self.Chrom], axis=0)
+            # self.Chrom = np.concatenate([Chrom_old, self.Chrom], axis=0)
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()
@@ -354,26 +356,28 @@ class GA_TSP(GeneticAlgorithmBase):
             if self.no_gain_count > 2:
                 color.error(f"at generation {i},GA stucked,call DSE……")
                 #得到新的测试用例
-                new_cases = DSE_print_tokens.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr)
+                new_cases = DSE_replace.pass_cases_to_DSE_and_get_new_case_back_to_GA(
+                    self.Chrom, target_, visited_addr)
                 #直接运行测试用例
                 print(new_cases)
                 if not new_cases:
                     continue
                 for nc in new_cases:
-                    subprocess.run(args = [os.path.join(target_.target_exe_path,target_.target_name)],input=nc[0],check=False)
+                    subprocess.run(args=[os.path.join(
+                        target_.target_exe_path, target_.target_name), nc[0], nc[1]], input=nc[2].encode(), check=False)
                     #加入到all old存储
                     self.all_old_chrom.append(nc)
                     #截断加入chrom中去变异
-                    nc[0]=nc[0].decode()
                     new_DSE_case = []
                     for arg in nc:
                         for char in arg:
-                            import string
+                            print(type(char))
                             if char in string.printable[:95]:
                                 new_DSE_case.append(string.printable[:95].index(char))
                     self.Chrom = np.row_stack([self.Chrom,new_DSE_case])
                 self.no_gain_count = 0
-            color.info(f"at generation{i},pop_size is:{len(self.Chrom)},all pop_size is{len(self.all_old_chrom)}")
+            color.info(
+                f"at generation{i},pop_size is: {len(self.Chrom)},all pop_size is: {len(self.all_old_chrom)}")
                 # exit(0)
 
 

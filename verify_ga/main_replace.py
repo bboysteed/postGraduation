@@ -103,8 +103,9 @@ def main():
     y_data = [round(float(i),2) for i in ga_tsp.generation_best_Y]
     x_data = np.linspace(1,len(y_data),len(y_data))
     
-    df = pd.DataFrame(index=x_data,data=y_data,columns=["代码行覆盖率"])
-    df.to_excel(os.path.join(target.target_exe_path,f"{target.target_name}.xlsx"))
+    df = pd.DataFrame(index=x_data, data=y_data, columns=["GA+DSE"])
+    df.to_excel(os.path.join(target.target_exe_path,
+                f"{target.target_name}-GA-DSE.xlsx"))
     plot_chart(x_data=x_data,y_data=y_data)
 
    

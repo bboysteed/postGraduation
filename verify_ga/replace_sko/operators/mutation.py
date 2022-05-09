@@ -98,7 +98,7 @@ def mut_schedule(individual):
     return individual
 
 def mut_replace(individual):
-    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/2))
+    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/5))
     for idx in idxs:
         individual[idx] = random.randint(0,94)# 包括94
     return individual

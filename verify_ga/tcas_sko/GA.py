@@ -348,13 +348,13 @@ class GA_TSP(GeneticAlgorithmBase):
                 if self.generation_best_Y[-1] == self.generation_best_Y[-2]:
                     self.no_gain_count+=1
             print("all case legth->",len(self.Chrom))
-            if self.no_gain_count > 1:
-                color.error(f"at generation {i} GA stucked,call DSE……")
-                new_cases = DSE_tcas.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr = visited_addr)
-                if not new_cases:
-                    continue
-                self.Chrom = np.concatenate([self.Chrom,np.array(new_cases)],axis=0)
-                self.no_gain_count = 0
+            # if self.no_gain_count > 1:
+            #     color.error(f"at generation {i} GA stucked,call DSE……")
+            #     new_cases = DSE_tcas.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr = visited_addr)
+            #     if not new_cases:
+            #         continue
+            #     self.Chrom = np.concatenate([self.Chrom,np.array(new_cases)],axis=0)
+            #     self.no_gain_count = 0
 
 
 

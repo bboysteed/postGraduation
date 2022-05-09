@@ -7,7 +7,6 @@ import claripy
 import random
 import logging
 
-from pip import main
 
 logging.getLogger('angr.manager').setLevel(logging.INFO)  # 用来记录日志
 

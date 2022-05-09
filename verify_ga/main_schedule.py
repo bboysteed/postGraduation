@@ -71,7 +71,10 @@ def main():
     y_data = [round(float(i),3) for i in ga_tsp.generation_best_Y]
     x_data = np.linspace(1,len(y_data),len(y_data))
 
-
+    import pandas as pd
+    df = pd.DataFrame(index=x_data, data=y_data, columns=["GA"])
+    df.to_excel(os.path.join(target.target_exe_path,
+                f"{target.target_name}_GA.xlsx"))
     (
         Line()
         .set_global_opts(
