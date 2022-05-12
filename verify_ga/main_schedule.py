@@ -38,6 +38,8 @@ def get_conv_rate(serial):
     run_bench_file(input_=list(serial),target=target)  # 运行程序
     gcovr_save_xml(target_=target)
     covr_rate = parse_xml_and_get_rate(target_=target)
+    global rate
+    rate = round(float(covr_rate), 2)
     return covr_rate   
 
 
@@ -58,10 +60,38 @@ def createPopulation(self):
 
     # self.allChrom += self.Chrom
     return self.Chrom
-#gcovr -r . --html --html-details -o coverage.html
-def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=2, max_iter=20, prob_mut=0.5)
+
+#gcovr -r . --html --html-details -o coverage.html
+rate = 0
+
+
+def main():
+
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points,
+                    crtp=createPopulation, size_pop=10, max_iter=200, prob_mut=0.5)
+
+    import threading
+
+    count = 1
+    if os.path.exists(f"{target.target_name}_cov_rate.txt"):
+        os.remove(f"{target.target_name}_cov_rate.txt")
+
+    def write_cov_rate(count):
+        count += 1
+        with open(f"{target.target_name}_cov_rate.txt", "a") as f:
+            f.write(str(rate)+"\n")
+            f.close()
+        if count > 60:
+            color.warning("times up!")
+            exit(0)
+        threading.Timer(interval=10, function=write_cov_rate,
+                        args=(count,)).start()
+
+    th = threading.Timer(
+        interval=10, function=write_cov_rate, args=(count,))
+    th.start()
+
     visited_state_addr = []
     best_points, best_distance = ga_tsp.run(target_ = target,visited_addr = visited_state_addr)
     print(best_points,best_distance)

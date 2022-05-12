@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import pyecharts.options as opts
 from pyecharts.charts import Line
-from replace_sko.GA import GA_TSP
+from print_tokens_sko.GA import GA_TSP
 from utils.pycui import *
 from utils.runfile import *
 import os
@@ -37,6 +37,8 @@ def get_conv_rate(serial):
     run_bench_file(input_=list(serial),target=target)  # 运行程序
     gcovr_save_xml(target_=target)
     covr_rate = parse_xml_and_get_rate(target_=target)
+    global rate
+    rate = covr_rate
     return covr_rate   
 
 
@@ -89,9 +91,36 @@ def plot_chart(x_data,y_data):
         .render(os.path.join(target.target_exe_path,f"results_{target.target_name}.html"))
     )
 
+
+rate = 0
+
 def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=4, max_iter=12, prob_mut=0.5)
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points,
+                    crtp=createPopulation, size_pop=4, max_iter=1020, prob_mut=0.5)
+
+    import threading
+
+    count = 1
+    if os.path.exists("./cov_rate.txt"):
+        os.remove("./cov_rate.txt")
+
+    def write_cov_rate(count):
+        count += 1
+        with open("cov_rate.txt", "a") as f:
+            f.write(str(rate)+"\n")
+            f.close()
+        if count > 60:
+            color.warning("times up!")
+            exit(0)
+        threading.Timer(interval=10, function=write_cov_rate,
+                        args=(count,)).start()
+
+    th = threading.Timer(
+        interval=10, function=write_cov_rate, args=(count,))
+    th.start()
+
+
     visited_state_addr = []
     best_points, best_distance = ga_tsp.run(target_=target,visited_addr=visited_state_addr)
     print(best_points,best_distance)

@@ -12,7 +12,7 @@ from .tools import func_transformer
 from abc import ABCMeta, abstractmethod
 from .operators import crossover, mutation, ranking, selection
 from utils.pycui import *
-import DSE_replace
+import DSE_print_tokens
 import os
 import string
 
@@ -356,7 +356,7 @@ class GA_TSP(GeneticAlgorithmBase):
             if self.no_gain_count > 2:
                 color.error(f"at generation {i},GA stucked,call DSE……")
                 #得到新的测试用例
-                new_cases = DSE_replace.pass_cases_to_DSE_and_get_new_case_back_to_GA(
+                new_cases = DSE_print_tokens.pass_cases_to_DSE_and_get_new_case_back_to_GA(
                     self.Chrom, target_, visited_addr)
                 #直接运行测试用例
                 print(new_cases)
@@ -377,7 +377,7 @@ class GA_TSP(GeneticAlgorithmBase):
                     self.Chrom = np.row_stack([self.Chrom,new_DSE_case])
                 self.no_gain_count = 0
             color.info(
-                f"at generation{i},pop_size is: {len(self.Chrom)},all pop_size is: {len(self.all_old_chrom)}")
+                f"at generation: {i},pop_size is: {len(self.Chrom)},all pop_size is: {len(self.all_old_chrom)}")
                 # exit(0)
 
 

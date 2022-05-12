@@ -348,22 +348,23 @@ class GA_TSP(GeneticAlgorithmBase):
                 if self.generation_best_Y[-1] == self.generation_best_Y[-2]:
                     self.no_gain_count+=1
             print("all case legth->",len(self.Chrom))
-            # if self.no_gain_count > 1:
-            #     color.error(f"at generation {i},GA stucked,call DSE……")
-            #     #得到一个新的测试用例
-            #     new_case = DSE_schedule.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr)
-            #     from utils import runfile
-            #     #直接运行测试用例
-            #     print(new_case)
-            #     if not new_case:
-            #         continue
-            #     runfile.run_bench_file(input_=list(new_case),target=target_)
-            #     #加入到all old存储
-            #     self.all_old_chrom.append(new_case)
-            #     #截断加入chrom中去变异
-            #     self.Chrom = np.row_stack([self.Chrom,new_case[:23]])
-            #     self.no_gain_count = 0
-            color.info(f"at generation{i},pop_size is:{len(self.Chrom)},all pop_size is{len(self.all_old_chrom)}")
+            if self.no_gain_count > 1:
+                color.error(f"at generation {i},GA stucked,call DSE……")
+                #得到一个新的测试用例
+                new_case = DSE_schedule.pass_cases_to_DSE_and_get_new_case_back_to_GA(
+                    self.Chrom, target_, visited_addr)
+                from utils import runfile
+                #直接运行测试用例
+                print(new_case)
+                if not new_case:
+                    continue
+                runfile.run_bench_file(input_=list(new_case), target=target_)
+                #加入到all old存储
+                self.all_old_chrom.append(new_case)
+                #截断加入chrom中去变异
+                self.Chrom = np.row_stack([self.Chrom, new_case[:23]])
+                self.no_gain_count = 0
+            color.info(f"at generation:{i},pop_size is:{len(self.Chrom)},all pop_size is{len(self.all_old_chrom)}")
                 # exit(0)
 
 

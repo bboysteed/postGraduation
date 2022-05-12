@@ -12,7 +12,6 @@ from .tools import func_transformer
 from abc import ABCMeta, abstractmethod
 from .operators import crossover, mutation, ranking, selection
 from utils.pycui import *
-import DSE_replace
 import os
 color = pycui()
 
@@ -354,20 +353,22 @@ class GA_TSP(GeneticAlgorithmBase):
             if self.no_gain_count > 2:
                 color.error(f"at generation {i},GA stucked,call DSE……")
                 #得到新的测试用例
-                new_cases = DSE_replace.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr)
+                import DSE_print_tokens
+                new_cases = DSE_print_tokens.pass_cases_to_DSE_and_get_new_case_back_to_GA(
+                    self.Chrom, target_, visited_addr)
                 #直接运行测试用例
                 print(new_cases)
                 if not new_cases:
                     continue
                 for nc in new_cases:
-                    subprocess.run(args = [os.path.join(target_.target_exe_path,target_.target_name),nc[0],nc[1]],input=nc[2],check=False)
+                    subprocess.run(args=[os.path.join(
+                        target_.target_exe_path, target_.target_name)], input=nc[0], check=False)
                     #加入到all old存储
                     self.all_old_chrom.append(nc)
                     #截断加入chrom中去变异
-                    nc[2]=nc[2].decode()
                     new_DSE_case = []
                     for arg in nc:
-                        for char in arg:
+                        for char in arg.decode():
                             import string
                             if char in string.printable[:95]:
                                 new_DSE_case.append(string.printable[:95].index(char))
