@@ -8,7 +8,8 @@
         "cstdio": "c",
         "stream.h": "c",
         "tokens.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "base64.h": "c"
     },
     "cmake.configureOnOpen": false
 }

@@ -7,12 +7,12 @@ INPUT_CLEAN="inputs/utmp.b64"
 
 echo "Building buggy ${PROG}..."
 
-cd coreutils-8.24-lava-safe
-make clean &> /dev/null
-./configure --prefix=`pwd`/lava-install LIBS="-lacl" &> /dev/null
-make -j $(nproc) &> /dev/null
-make install &> /dev/null
-cd ..
+#cd coreutils-8.24-lava-safe
+#make clean &> /dev/null
+#./configure --prefix=`pwd`/lava-install LIBS="-lacl" &> /dev/null
+#make -j $(nproc) &> /dev/null
+#make install &> /dev/null
+#cd ..
 
 echo "Checking if buggy ${PROG} succeeds on non-trigger input..."
 ./coreutils-8.24-lava-safe/lava-install/bin/${PROG} ${PROGOPT} ${INPUT_CLEAN} &> /dev/null 
@@ -25,7 +25,9 @@ fi
 
 echo "Validating bugs..."
 cat validated_bugs | while read line ; do
+    # echo $line
     INPUT_FUZZ=$(printf "$INPUT_PATTERN" $line)
+    echo $INPUT_FUZZ
     { ./coreutils-8.24-lava-safe/lava-install/bin/${PROG} ${PROGOPT} ${INPUT_FUZZ} ; } &> /dev/null
     echo $line $?
 done > validated.txt

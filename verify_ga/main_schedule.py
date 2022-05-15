@@ -1,4 +1,3 @@
-#!/home/steed/.virtualenvs/ga_env/bin/python
 from mimetypes import init
 from re import T
 import numpy as np

@@ -83,9 +83,9 @@ def main():
         with open(f"{target.target_name}_cov_rate.txt", "a") as f:
             f.write(str(rate)+"\n")
             f.close()
-        if count > 60:
-            color.warning("times up!")
-            exit(0)
+        # if count > 60:
+            # color.warning("times up!")
+            # exit(0)
         threading.Timer(interval=10, function=write_cov_rate,
                         args=(count,)).start()
 

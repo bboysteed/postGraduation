@@ -1,0 +1,88 @@
+inputs/utmp-fuzzed-1.b64
+1 139
+inputs/utmp-fuzzed-222.b64
+222 139
+inputs/utmp-fuzzed-235.b64
+235 139
+inputs/utmp-fuzzed-253.b64
+253 139
+inputs/utmp-fuzzed-255.b64
+255 139
+inputs/utmp-fuzzed-276.b64
+276 139
+inputs/utmp-fuzzed-278.b64
+278 139
+inputs/utmp-fuzzed-284.b64
+284 139
+inputs/utmp-fuzzed-386.b64
+386 139
+inputs/utmp-fuzzed-554.b64
+554 139
+inputs/utmp-fuzzed-556.b64
+556 139
+inputs/utmp-fuzzed-558.b64
+558 139
+inputs/utmp-fuzzed-560.b64
+560 139
+inputs/utmp-fuzzed-562.b64
+562 139
+inputs/utmp-fuzzed-566.b64
+566 139
+inputs/utmp-fuzzed-572.b64
+572 139
+inputs/utmp-fuzzed-573.b64
+573 139
+inputs/utmp-fuzzed-576.b64
+576 139
+inputs/utmp-fuzzed-582.b64
+582 139
+inputs/utmp-fuzzed-583.b64
+583 139
+inputs/utmp-fuzzed-584.b64
+584 139
+inputs/utmp-fuzzed-774.b64
+774 139
+inputs/utmp-fuzzed-776.b64
+776 139
+inputs/utmp-fuzzed-778.b64
+778 139
+inputs/utmp-fuzzed-780.b64
+780 139
+inputs/utmp-fuzzed-782.b64
+782 139
+inputs/utmp-fuzzed-784.b64
+784 139
+inputs/utmp-fuzzed-786.b64
+786 139
+inputs/utmp-fuzzed-788.b64
+788 139
+inputs/utmp-fuzzed-790.b64
+790 139
+inputs/utmp-fuzzed-792.b64
+792 139
+inputs/utmp-fuzzed-798.b64
+798 139
+inputs/utmp-fuzzed-804.b64
+804 139
+inputs/utmp-fuzzed-805.b64
+805 139
+inputs/utmp-fuzzed-806.b64
+806 139
+inputs/utmp-fuzzed-813.b64
+813 139
+inputs/utmp-fuzzed-815.b64
+815 139
+inputs/utmp-fuzzed-817.b64
+817 139
+inputs/utmp-fuzzed-831.b64
+831 139
+inputs/utmp-fuzzed-832.b64
+832 139
+inputs/utmp-fuzzed-835.b64
+835 139
+inputs/utmp-fuzzed-841.b64
+841 139
+inputs/utmp-fuzzed-842.b64
+842 139
+inputs/utmp-fuzzed-843.b64
+843 139

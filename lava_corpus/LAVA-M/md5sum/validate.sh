@@ -5,14 +5,14 @@ PROGOPT="-c"
 INPUT_PATTERN="inputs/bin-ls-md5s-fuzzed-%s"
 INPUT_CLEAN="inputs/bin-ls-md5s"
 
-echo "Building buggy ${PROG}..."
+# echo "Building buggy ${PROG}..."
 
-cd coreutils-8.24-lava-safe
-make clean &> /dev/null
-./configure --prefix=`pwd`/lava-install LIBS="-lacl" &> /dev/null
-make -j $(nproc) &> /dev/null
-make install &> /dev/null
-cd ..
+# cd coreutils-8.24-lava-safe
+# make clean &> /dev/null
+# ./configure --prefix=`pwd`/lava-install LIBS="-lacl" &> /dev/null
+# make -j $(nproc) &> /dev/null
+# make install &> /dev/null
+# cd ..
 
 echo "Checking if buggy ${PROG} succeeds on non-trigger input..."
 ./coreutils-8.24-lava-safe/lava-install/bin/${PROG} ${PROGOPT} ${INPUT_CLEAN} &> /dev/null 
