@@ -9,7 +9,9 @@
         "stream.h": "c",
         "tokens.h": "c",
         "cstdlib": "c",
-        "base64.h": "c"
+        "base64.h": "c",
+        "*.tlh": "cpp",
+        "*.ph": "cpp"
     },
     "cmake.configureOnOpen": false
 }
