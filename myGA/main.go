@@ -3,8 +3,8 @@
  * @version:
  * @Author: steed
  * @Date: 2022-05-28 14:17:59
- * @LastEditors: steed
- * @LastEditTime: 2022-05-28 15:14:45
+ * @LastEditors: bboysteed 18811603538@163.com
+ * @LastEditTime: 2022-06-01 22:48:38
  */
 
 package main
@@ -16,7 +16,12 @@ import (
 )
 
 func main() {
-	myga := myGa.NewGaEngin(10, 2)
+	myga,err:= myGa.NewGaEngin("./seeds","./out")
+	if err != nil {
+		fmt.Println("init GaEngin failed with err: ",err)
+	}
+
+	
 	fmt.Println(myga.Populations)
 	fmt.Println(hex.Dump(myga.Populations[0]))
 }
