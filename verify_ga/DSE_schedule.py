@@ -13,7 +13,6 @@ import itertools
 import random
 import logging
 
-from pip import main
 logging.getLogger('angr.manager').setLevel(logging.INFO) #用来记录日志
 
 color = pycui()
@@ -40,14 +39,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         def run(self, ptr,format_string_ptr, param0):
             scanf0_address = param0
             a = self.state.memory.load(format_string_ptr, 2)
-                # print(a)
             format_str = self.state.solver.eval(a,cast_to=bytes)
-            # def drop_state(state):
-            #     if "idx" in state.globals.keys():
-            #         return state.globals['idx'] > 19
-            #     else:
-            #         return False
-            # simulation.drop(filter_func=drop_state)
             if self.state.globals['concrect'] == 1:
                 passed_num = 0
                 if self.state.globals['idx'] >= 23:

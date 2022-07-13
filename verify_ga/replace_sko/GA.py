@@ -12,7 +12,7 @@ from .tools import func_transformer
 from abc import ABCMeta, abstractmethod
 from .operators import crossover, mutation, ranking, selection
 from utils.pycui import *
-import DSE_print_tokens
+import DSE_replace
 import os
 import string
 
@@ -330,17 +330,17 @@ class GA_TSP(GeneticAlgorithmBase):
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()
-            # self.selection() #计算累计覆盖率这里不进行选择
+            self.selection() #计算累计覆盖率这里不进行选择
             self.crossover()
             self.mutation()
 
             # put parent and offspring together and select the best size_pop number of population
-            # self.Chrom = np.concatenate([Chrom_old, self.Chrom], axis=0)
+            self.Chrom = np.concatenate([Chrom_old, self.Chrom], axis=0)
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()
-            # selected_idx = np.argsort(self.Y)[:self.size_pop]
-            # self.Chrom = self.Chrom[selected_idx, :] 同理合并上下代不进行选择，种群没有死亡一说
+            selected_idx = np.argsort(self.Y)[:self.size_pop]
+            self.Chrom = self.Chrom[selected_idx, :] #同理合并上下代不进行选择，种群没有死亡一说
 
             # record the best ones
             generation_best_index = self.FitV.argmax()
@@ -353,10 +353,10 @@ class GA_TSP(GeneticAlgorithmBase):
                 if self.generation_best_Y[-1] == self.generation_best_Y[-2]:
                     self.no_gain_count+=1
             print("all case legth->",len(self.Chrom))
-            if self.no_gain_count > 2:
+            if self.no_gain_count > 1:
                 color.error(f"at generation {i},GA stucked,call DSE……")
                 #得到新的测试用例
-                new_cases = DSE_print_tokens.pass_cases_to_DSE_and_get_new_case_back_to_GA(
+                new_cases = DSE_replace.pass_cases_to_DSE_and_get_new_case_back_to_GA(
                     self.Chrom, target_, visited_addr)
                 #直接运行测试用例
                 print(new_cases)
@@ -371,9 +371,9 @@ class GA_TSP(GeneticAlgorithmBase):
                     new_DSE_case = []
                     for arg in nc:
                         for char in arg:
-                            print(type(char))
-                            if char in string.printable[:95]:
-                                new_DSE_case.append(string.printable[:95].index(char))
+                            # print(type(char))
+                            if char in string.printable[:100]:
+                                new_DSE_case.append(string.printable[:100].index(char))
                     self.Chrom = np.row_stack([self.Chrom,new_DSE_case])
                 self.no_gain_count = 0
             color.info(

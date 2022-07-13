@@ -332,7 +332,7 @@ class GA_TSP(GeneticAlgorithmBase):
             self.mutation()
 
             # put parent and offspring together and select the best size_pop number of population
-            self.Chrom = np.concatenate([Chrom_old, self.Chrom], axis=0)
+            # self.Chrom = np.concatenate([Chrom_old, self.Chrom], axis=0)
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()

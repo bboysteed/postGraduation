@@ -20,8 +20,6 @@ func main() {
 	if err != nil {
 		fmt.Println("init GaEngin failed with err: ",err)
 	}
-
-	
 	fmt.Println(myga.Populations)
 	fmt.Println(hex.Dump(myga.Populations[0]))
 }

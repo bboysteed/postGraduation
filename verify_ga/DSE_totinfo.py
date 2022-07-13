@@ -1,5 +1,7 @@
 import random
 import datetime
+import subprocess
+from xml.dom.minidom import parse
 from utils.pycui import pycui
 import angr
 import os
@@ -7,8 +9,10 @@ import claripy
 import random
 import logging
 
+from utils.runfile import gcovr_save_xml, parse_xml_and_get_rate, run_bench_file
 
-logging.getLogger('angr.manager').setLevel(logging.INFO)  # 用来记录日志
+
+# logging.getLogger('angr.manager').setLevel(logging.INFO)  # 用来记录日志
 
 color = pycui()
 random_scanf_num = []
@@ -113,74 +117,114 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_a
 
             # return 1
 
-    project.hook_symbol('__isoc99_scanf', ReplacementScanf())
-    project.hook_symbol('__isoc99_sscanf', ReplacementSscanf())
-    project.hook_symbol('fgets', ReplacementFgets())
+    # project.hook_symbol('__isoc99_scanf', ReplacementScanf())
+    # project.hook_symbol('__isoc99_sscanf', ReplacementSscanf())
+    # project.hook_symbol('fgets', ReplacementFgets())
 
-    cases = format_cases(pass_cases_)
-    print(cases)
-    visited_state_addr = visited_addr
-    visited_state = []
-    for case in cases:
-        initial_state = project.factory.entry_state()
-        simulation = project.factory.simgr(initial_state)
-        initial_state.globals['case'] = case
-        initial_state.globals['idx'] = 0
-        initial_state.globals['concrect'] = 1
+    # cases = format_cases(pass_cases_)
+    # print(cases)
+    # visited_state_addr = visited_addr
+    # visited_state = []
+    # for case in cases:
+    #     inp = " ".join([str(i) for i in case[:2]]) + "\n" + " ".join(
+    #         [str(i) for i in case[10:10+case[0]*case[1]]]) + "\n"
+    #     color.success(f"[具体执行][{inp.encode()}]")
 
-        while len(simulation.stashes['active']) > 0:
-            # print("active length:",len(simulation.stashes['active']))
-            for state in simulation.active:
-                if state.addr not in visited_state_addr:
-                    visited_state_addr.append(state.addr)
-                    visited_state.append(state)
-            # print("active state input:  ",state.posix.dumps(0))
-            # print("active state output:  ",state.posix.dumps(1))
-            # print(simulation.stashes)
-            simulation.step()
-    color.success(f"DSE store all visited state address:{visited_state_addr}")
-    color.success(f"all visited state address length is:{len(visited_state_addr)}")
+    #     initial_state = project.factory.entry_state(
+    #         stdin=inp
+
+    #     )
+    #     simulation = project.factory.simgr(initial_state)
+    #     # initial_state.globals['case'] = case
+    #     # initial_state.globals['idx'] = 0
+    #     # initial_state.globals['concrect'] = 1
+
+    #     while len(simulation.stashes['active']) > 0:
+    #         # print("active length:",len(simulation.stashes['active']))
+    #         for state in simulation.active:
+    #             if state.addr not in visited_state_addr:
+    #                 visited_state_addr.append(state.addr)
+    #                 # visited_state.append(state)
+    #         # print("active state input:  ",state.posix.dumps(0))
+    #         # print("active state output:  ",state.posix.dumps(1))
+    #         # print(simulation.stashes)
+    #         simulation.step()
+    # # color.success(f"DSE store all visited state address:{visited_state_addr}")
+    # color.success(f"all visited state address length is:{len(visited_state_addr)}")
     # print(simulation.deadended[0].posix.dumps(0))
     # print(simulation.deadended[0].posix.dumps(1))
     # 
 
     # 进行符号执行，获取新的状态地址
-    initial_state = project.factory.entry_state()
+    flag_chars = [claripy.BVS('num_%d' % i, 8) for i in range(30)]
+
+    flag = claripy.Concat(*flag_chars)
+    initial_state = project.factory.entry_state(
+        stdin=flag
+    )
+    for byte in flag_chars:
+        initial_state.solver.add(byte >= 0x20)
+        initial_state.solver.add(byte <= 0x7e)
     simulation = project.factory.simgr(initial_state)
-    initial_state.globals['concrect'] = 0
-    initial_state.globals['scanf_solutions'] = []
-    initial_state.globals['sscanf_solutions'] = []
+    # initial_state.globals['concrect'] = 0
+    # initial_state.globals['scanf_solutions'] = []
+    # initial_state.globals['sscanf_solutions'] = []
     new_states = []
     while simulation.active:
         for state in simulation.active:
-            if state.addr not in visited_state_addr:
-                color.success(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
-                new_states.append(state)
-            print("约束长度：", len(state.solver.constraints))
-        simulation.step()
-        print("活跃长度：", len(simulation.active))
+            color.success(f"visited len:{len(visited_addr)}")
+            print("约束长度为：", len(state.solver.constraints))
+            if len(state.solver.constraints) > 200:
+                color.success("削减约束")
+                for i in range((len(state.solver.constraints)//90)**2*12):
+                    state.solver.constraints.pop()
+                state.solver.reload_solver()
 
-        if len(new_states) > 0:
-            break
-    if simulation.unsat:
-        print(simulation.unsat[0].solver.constraints)
+            if state.addr not in visited_addr:
+                color.success(
+                    f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
+                new_states.append(state)
+                visited_addr.append(state.addr)
+                new_states.append(state)
+            # visited_addr.append(state.addr)
+                color.success(f"【符号执行】【{state.posix.dumps(0)}】")
+                subprocess.run(args=[os.path.join(
+                    target.target_exe_path, target.target_name)], input=state.posix.dumps(0), check=False)
+                gcovr_save_xml(target_=target)
+                covr_rate = parse_xml_and_get_rate(target_=target)
+                color.success(f"cur rate:{covr_rate}")
+                color.success(f"active state output:  {state.posix.dumps(1)}")
+
+            # print("约束长度：", len(state.solver.constraints))
+        simulation.step()
+        # print("活跃长度：", len(simulation.active))
+
+        if len(new_states) > 1:
+            return
+    # if simulation.unsat:
+        # print(simulation.unsat[0].solver.constraints)
 
     if not new_states:
         color.warning("no more new state found!")
     new_DSE_cases = []
     for new_st in new_states:
-        # print("active state input:  ",new_st.posix.dumps(0))
-        print("active state output:  ", new_st.posix.dumps(1))
-        sscanf_stored_solution = new_st.globals['sscanf_solutions']
+        color.success(f"【符号执行】【{new_st.posix.dumps(0)}】")
+        subprocess.run(args=[os.path.join(
+            target.target_exe_path, target.target_name)], input=new_st.posix.dumps(0), check=False)
+        gcovr_save_xml(target_=target)
+        covr_rate = parse_xml_and_get_rate(target_=target)
+        color.success(f"cur rate:{covr_rate}")
+        color.success(f"active state output:  {new_st.posix.dumps(1)}")
+        # sscanf_stored_solution = new_st.globals['sscanf_solutions']
         # scanf_stored_solution = new_st.globals['scanf_solutions']
         # print(scanf_stored_solution)
         # print(sscanf_stored_solution)
-        if sscanf_stored_solution:
-            tmp = list(map(str, map(new_st.solver.eval, sscanf_stored_solution)))
-            sscanf0 = tmp[0]
-            sscanf1 = tmp[1]
-            print("r&c->", sscanf0, sscanf1)
-        print(random_scanf_num)
+        # if sscanf_stored_solution:
+        # tmp = list(map(str, map(new_st.solver.eval, sscanf_stored_solution)))
+        # sscanf0 = tmp[0]
+        # sscanf1 = tmp[1]
+        # print("r&c->", sscanf0, sscanf1)
+        # print(random_scanf_num)
         # random_scanf_num = []
         # print(scanf_stored_solution)
         # if scanf_stored_solution:
@@ -188,8 +232,8 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_a
         #     print(solution_scanf)
         # print(random_scanf_num)
 
-        new_DSE_cases.append([int(sscanf0), int(sscanf1)] + [1] * 8 + [int(i) for i in random_scanf_num] + [2] * (
-                    81 - len(random_scanf_num)))
+        # new_DSE_cases.append([int(sscanf0), int(sscanf1)] + [1] * 8 + [int(i) for i in random_scanf_num] + [2] * (
+        # 81 - len(random_scanf_num)))
     print("new_DSE_cases:", new_DSE_cases)
     return new_DSE_cases
 

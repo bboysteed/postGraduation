@@ -1,3 +1,11 @@
+'''
+Author: bboysteed 18811603538@163.com
+Date: 2022-04-11 21:18:49
+LastEditors: bboysteed 18811603538@163.com
+LastEditTime: 2022-06-26 20:12:18
+FilePath: /verify_ga/utils/runfile.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
 import subprocess
 import os
 from xml.dom.minidom import parse
@@ -8,7 +16,7 @@ import string
 
 color = pycui()
     
-strprintable = string.printable[:95]
+strprintable = string.printable[:100]
 
 def run_bench_file(input_,target):
     exefilepath = target.target_exe_path

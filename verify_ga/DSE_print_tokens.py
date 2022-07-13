@@ -13,7 +13,7 @@ import claripy
 import itertools
 import random
 import logging
-
+import time
 from pip import main
 logging.getLogger('angr.manager').setLevel(logging.INFO) #用来记录日志
 
@@ -81,7 +81,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
     # # print(simulation.deadended[0].posix.dumps(1))
     # # 
     # exit(0)
-
+    st = time.time()
     # 2.进行符号执行，获取新的状态地址
     stdin = [claripy.BVS(f'stdin_{i}', 8)for i in range(40)] 
     # v2 = claripy.BVS('v2', 24)
@@ -118,7 +118,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
                 visited_state_addr.append(state.addr)
         simulation.step()
 
-        if len(new_states)>0:
+        if len(new_states) > 30 or time.time()-st > 3*60:
             break
     # exit(0)
     print(simulation.stashes)
@@ -126,7 +126,7 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_,target,visited_add
         print(simulation.unsat[0].solver.constraints)
     if not new_states:
         color.warning("no more state found!!!")
-        import time
+
         time.sleep(3)
     new_DSE_cases = []
     for new_st in new_states:

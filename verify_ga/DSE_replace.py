@@ -1,10 +1,8 @@
 import string
-from calendar import c
 import random
-from re import A, T
+
 import datetime
 import numpy as np
-from sympy import im
 from utils.pycui import pycui
 import angr
 import subprocess
@@ -14,7 +12,7 @@ import claripy
 import itertools
 import random
 import logging
-
+import time
 from pip import main
 logging.getLogger('angr.manager').setLevel(logging.INFO)  # 用来记录日志
 
@@ -42,8 +40,7 @@ def format_cases(cases):
 
 def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_addr):
     path_to_binary = os.path.join(target.target_exe_path, target.target_name)
-    project = angr.Project(path_to_binary, load_options={
-                           'auto_load_libs': False})
+    project = angr.Project(path_to_binary)
 
     class ReplacementFscanf(angr.SimProcedure):
         def run(self, ptr, format_string_ptr, param0):
@@ -210,57 +207,58 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_a
             return 1
     # project.hook_symbol('__isoc99_fscanf', ReplacementFscanf())
     # project.hook_symbol('__isoc99_sscanf', ReplacementSscanf())
-    project.hook_symbol('fgets', ReplacementFgets())
-    project.hook_symbol('fputc', ReplacementFputc())
+    # project.hook_symbol('fgets', ReplacementFgets())
+    # project.hook_symbol('fputc', ReplacementFputc())
 
-    cases = format_cases(pass_cases_)
+    # cases = format_cases(pass_cases_)
     # 1.进行具体执行
-    print(cases)
-    visited_state_addr = visited_addr
-    # visited_state = []
-    for case in cases:
-        color.info(f"concrect case is: {case}")
-        initial_state = project.factory.full_init_state(
-            args=[path_to_binary, case[0], case[1]],
-            # input = SimFileStream(name='stdin',content=case[2]+b'\n',has_end=True)
-            # stdin = case[2]+b'\n'
-        )
-        simulation = project.factory.simgr(initial_state)
-        initial_state.globals['case'] = case
-        # initial_state.globals['idx'] = 3
-        # initial_state.globals['concrect'] = 1
+    # print(cases)
+    # visited_state_addr = visited_addr
+    # # visited_state = []
+    # for case in cases:
+    #     color.info(f"concrect case is: {case}")
+    #     initial_state = project.factory.full_init_state(
+    #         args=[path_to_binary, case[0], case[1]],
+    #         # input = SimFileStream(name='stdin',content=case[2]+b'\n',has_end=True)
+    #         # stdin = case[2]+b'\n'
+    #     )
+    #     simulation = project.factory.simgr(initial_state)
+    #     initial_state.globals['case'] = case
+    #     # initial_state.globals['idx'] = 3
+    #     # initial_state.globals['concrect'] = 1
 
-        while simulation.active:
-            simulation.step()
+    #     while simulation.active:
+    #         simulation.step()
 
-            print("active length:", len(simulation.active))
-            for state in simulation.active:
-                # print(case)
-                print("constrains length is", len(state.solver.constraints))
-                # color.info(f"this state's idx is: {state.globals['idx']}")
-                if state.addr not in visited_state_addr:
-                    visited_state_addr.append(state.addr)
-                    # visited_state.append(state)
-                # def dd(state):
-                #     # color.error(f"随机数长度-->{len(random_scanf_num)}")
-                #     return len(state.solver.constraints) > 80
-                # simulation.drop(filter_func=dd)
-                # print("active state input:  ",state.posix.dumps(0))
-                print("active state output:  ", state.posix.dumps(1))
-                print("visited length:  ", len(visited_addr))
-            #  print(simulation.stashes)
-                print("active length is", len(simulation.active))
-        color.warning(f"visited addr length is:{len(visited_state_addr)}")
+    #         print("active length:", len(simulation.active))
+    #         for state in simulation.active:
+    #             # print(case)
+    #             print("constrains length is", len(state.solver.constraints))
+    #             # color.info(f"this state's idx is: {state.globals['idx']}")
+    #             if state.addr not in visited_state_addr:
+    #                 visited_state_addr.append(state.addr)
+    #                 # visited_state.append(state)
+    #             # def dd(state):
+    #             #     # color.error(f"随机数长度-->{len(random_scanf_num)}")
+    #             #     return len(state.solver.constraints) > 80
+    #             # simulation.drop(filter_func=dd)
+    #             # print("active state input:  ",state.posix.dumps(0))
+    #             print("active state output:  ", state.posix.dumps(1))
+    #             print("visited length:  ", len(visited_addr))
+    #         #  print(simulation.stashes)
+    #             print("active length is", len(simulation.active))
+    #     color.warning(f"visited addr length is:{len(visited_state_addr)}")
 
-    color.success(f"DSE store all visited state address:{visited_state_addr}")
-    color.success(
-        f"all visited state address length is:{len(visited_state_addr)}")
+    # color.success(f"DSE store all visited state address:{visited_state_addr}")
+    # color.success(
+        # f"all visited state address length is:{len(visited_state_addr)}")
     # # print(simulation.deadended[0].posix.dumps(0))
     # # print(simulation.deadended[0].posix.dumps(1))
     # #
     # exit(0)
 
     # 2.进行符号执行，获取新的状态地址
+    st = time.time()
     arg1 = [claripy.BVS(f'ch_{i}', 8) for i in range(5)]
     arg2 = [claripy.BVS(f'ch_{i}', 8) for i in range(5)]
     stdin = [claripy.BVS(f'stdin_{i}', 8)for i in range(20)]
@@ -273,9 +271,9 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_a
         stdin=claripy.Concat(*stdin)
     )
     for i in stdin:
-        initial_state.solver.add(i >= 0x20, i < 0x7e)
+        initial_state.solver.add(i >= 0x20, i <= 0x7e)
     for i in arg1+arg2:
-        initial_state.solver.add(i >= 0x20, i < 0x7e)
+        initial_state.solver.add(i >= 0x20, i <= 0x7e)
     simulation = project.factory.simgr(initial_state,)
 
     # initial_state.globals['concrect'] = 0
@@ -283,7 +281,10 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_a
     new_states = []
     while simulation.active:
         for state in simulation.active:
-            print("constrains length is", len(state.solver.constraints))
+            color.warning(f"visited length is: {len(visited_addr)}")
+
+            color.warning(f"active length is: {len(simulation.active)}")
+            print("constrains length is: ", len(state.solver.constraints))
             print("active state input:  ", state.posix.dumps(0))
             ans1 = b""
             for i in arg1:
@@ -298,20 +299,26 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_a
                 ans3 += state.solver.eval(i, cast_to=bytes)
             print("ans3:", ans3)
             # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
-            # def dd(state):
-            #     # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
-            #     return len(state.solver.constraints) > 100
-            # simulation.drop(filter_func=dd)
+
+            def dd(state):
+                # color.error(f"长度-->{len(state.globals['scanf_solutions'])}")
+                return random.random() < 0.7
+            if len(simulation.active) > 200:
+                simulation.drop(filter_func=dd)
+
             print("active state output:  ", state.posix.dumps(1))
-            if state.addr not in visited_state_addr:
+            if state.addr not in visited_addr:
                 color.success(
                     f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")}DSE found the new state!')
                 new_states.append(state)
-                visited_state_addr.append(state.addr)
+                visited_addr.append(state.addr)
+                subprocess.run(args=[os.path.join(
+                    target.target_exe_path, target.target_name), ans1, ans2], input=state.posix.dumps(0), check=False)
+
         simulation.step()
 
-        # if len(new_states) > 10:
-        # break
+        if len(new_states) > 30 or time.time()-st > 3*60:
+            break
     # exit(0)
     print(simulation.stashes)
     if simulation.unsat:
@@ -319,7 +326,6 @@ def pass_cases_to_DSE_and_get_new_case_back_to_GA(pass_cases_, target, visited_a
     if not new_states:
         color.warning("no more state found!!!")
         print(simulation.stashes)
-        import time
         time.sleep(3)
     new_DSE_cases = []
     for new_st in new_states:

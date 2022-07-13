@@ -25,7 +25,8 @@ def mutation_TSP_1(self):
         for j in range(self.n_dim):
             if np.random.rand() < self.prob_mut:
                 n = np.random.randint(0, self.len_chrom, 1)
-                self.Chrom[i, j], self.Chrom[i, n] = self.Chrom[i, n], self.Chrom[i, j]
+                self.Chrom[i, j], self.Chrom[i,
+                                             n] = self.Chrom[i, n], self.Chrom[i, j]
     return self.Chrom
 
 
@@ -56,7 +57,8 @@ def transpose(individual):
     n1, n2, n3 = sorted(np.random.randint(0, individual.shape[0] - 2, 3))
     n2 += 1
     n3 += 2
-    slice1, slice2, slice3, slice4 = individual[0:n1], individual[n1:n2], individual[n2:n3 + 1], individual[n3 + 1:]
+    slice1, slice2, slice3, slice4 = individual[0:n1], individual[n1:
+                                                                  n2], individual[n2:n3 + 1], individual[n3 + 1:]
     individual = np.concatenate([slice1, slice3, slice2, slice4])
     return individual
 
@@ -73,32 +75,34 @@ def mutation_reverse(self):
     return self.Chrom
 
 
-
-
 def mut(individual):
-    idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/20))
-    for idx in idxs:
-        if idx <10:
-            individual[idx] = random.randint(0,10)  
-        elif idx>9:
-            individual[idx] = random.randint(-3,30)
+    # idxs = np.random.randint(0,individual.shape[0]-1,int(individual.shape[0]/20))
+    for idx in range(individual.shape[0]):
+        if idx < 10:
+            individual[idx] = random.randint(0, 10)
+        elif idx > 9:
+            individual[idx] = random.randint(-30, 30)
     return individual
+
 
 def mutation_totinfo(self):
     for i in range(self.size_pop):
         if np.random.rand() < self.prob_mut:
             self.Chrom[i] = mut(self.Chrom[i])
-    return self.Chrom 
+    return self.Chrom
+
+
 def mutation_swap(self):
     for i in range(self.size_pop):
         if np.random.rand() < self.prob_mut:
             self.Chrom[i] = swap(self.Chrom[i])
     return self.Chrom
 
+
 def mutation_mutation_real(self):
     for i in range(self.size_pop):
         if np.random.rand() < self.prob_mut:
-            idx = np.random.randint(0,len(self.Chrom[i]),5)
+            idx = np.random.randint(0, len(self.Chrom[i]), 5)
             for id in idx:
-                self.Chrom[i][id] = 0 if self.Chrom[i][id]==1 else 0
+                self.Chrom[i][id] = 0 if self.Chrom[i][id] == 1 else 0
     return self.Chrom

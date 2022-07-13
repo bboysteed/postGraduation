@@ -69,28 +69,28 @@ rate = 0
 def main():
 
     ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points,
-                    crtp=createPopulation, size_pop=2, max_iter=1200, prob_mut=0.5)
+                    crtp=createPopulation, size_pop=2, max_iter=300, prob_mut=0.5)
 
-    import threading
+    # import threading
 
-    count = 1
-    if os.path.exists(f"{target.target_name}_cov_rate.txt"):
-        os.remove(f"{target.target_name}_cov_rate.txt")
+    # count = 1
+    # if os.path.exists(f"{target.target_name}_cov_rate.txt"):
+    #     os.remove(f"{target.target_name}_cov_rate.txt")
 
-    def write_cov_rate(count):
-        count += 1
-        with open(f"{target.target_name}_cov_rate.txt", "a") as f:
-            f.write(str(rate)+"\n")
-            f.close()
-        if count > 60:
-            color.warning("times up!")
-            exit(0)
-        threading.Timer(interval=10, function=write_cov_rate,
-                        args=(count,)).start()
+    # def write_cov_rate(count):
+    #     count += 1
+    #     with open(f"{target.target_name}_cov_rate.txt", "a") as f:
+    #         f.write(str(rate)+"\n")
+    #         f.close()
+    #     if count > 60:
+    #         color.warning("times up!")
+    #         exit(0)
+    #     threading.Timer(interval=10, function=write_cov_rate,
+    #                     args=(count,)).start()
 
-    th = threading.Timer(
-        interval=10, function=write_cov_rate, args=(count,))
-    th.start()
+    # th = threading.Timer(
+    #     interval=10, function=write_cov_rate, args=(count,))
+    # th.start()
 
     visited_addr = []
     best_points, best_distance = ga_tsp.run(
@@ -98,13 +98,13 @@ def main():
     print(best_points, best_distance)
     println(ga_tsp.Chrom)
 
-    y_data = [round(float(n), 2) for n in ga_tsp.generation_best_Y]
+    y_data = [round(float(n), 3) for n in ga_tsp.generation_best_Y]
     x_data = np.linspace(1, len(y_data), len(y_data))
 
-    import pandas as pd
-    df = pd.DataFrame(index=x_data, data=y_data, columns=["代码行覆盖率"])
-    df.to_excel(os.path.join(target.target_exe_path,
-                f"{target.target_name}_GA.xlsx"))
+    # import pandas as pd
+    # df = pd.DataFrame(index=x_data, data=y_data, columns=["GA+DSE"])
+    # df.to_excel(os.path.join(target.target_exe_path,
+    #             f"{target.target_name}_GA_DSE.xlsx"))
     (
         Line()
         .set_global_opts(

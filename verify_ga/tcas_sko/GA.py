@@ -315,7 +315,7 @@ class GA_TSP(GeneticAlgorithmBase):
     ranking = ranking.ranking
     selection = selection.selection_tournament_faster
     crossover = crossover.crossover_2point
-    mutation = mutation.mutation_swap
+    mutation = mutation.mutation_tcas
 
     def run(self, target_,visited_addr,max_iter=None):
         self.max_iter = max_iter or self.max_iter
@@ -348,14 +348,24 @@ class GA_TSP(GeneticAlgorithmBase):
                 if self.generation_best_Y[-1] == self.generation_best_Y[-2]:
                     self.no_gain_count+=1
             print("all case legth->",len(self.Chrom))
-            # if self.no_gain_count > 1:
-            #     color.error(f"at generation {i} GA stucked,call DSE……")
-            #     new_cases = DSE_tcas.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr = visited_addr)
-            #     if not new_cases:
-            #         continue
-            #     self.Chrom = np.concatenate([self.Chrom,np.array(new_cases)],axis=0)
-            #     self.no_gain_count = 0
+            if self.no_gain_count > 1:
+                color.error(f"at generation {i} GA stucked,call DSE……")
+                new_cases = DSE_tcas.pass_cases_to_DSE_and_get_new_case_back_to_GA(
+                    self.Chrom, target_, visited_addr=visited_addr)
+                if not new_cases:
+                    continue
+                self.Chrom = np.concatenate(
+                    [self.Chrom, np.array(new_cases)], axis=0)
+                self.no_gain_count = 0
+            y_data = [round(float(num), 3)
+                      for num in self.generation_best_Y]
+            x_data = np.linspace(1, len(y_data), len(y_data))
 
+            import pandas as pd
+            import os
+            df = pd.DataFrame(index=x_data, data=y_data, columns=["GA+DSE"])
+            df.to_excel(
+                "/home/t5/mywork/postGraduation/verify_ga/tcas/source.alt/tcas_with_dse.xlsx")
 
 
         global_best_index = np.array(self.generation_best_Y).argmin()

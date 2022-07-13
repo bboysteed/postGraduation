@@ -4,6 +4,7 @@
 # @Author  : github.com/guofei9987
 
 
+import os
 import numpy as np
 from .base import SkoBase
 from .tools import func_transformer
@@ -12,7 +13,6 @@ from .operators import crossover, mutation, ranking, selection
 from utils.pycui import *
 import DSE_totinfo
 color = pycui()
-
 
 
 class GeneticAlgorithmBase(SkoBase, metaclass=ABCMeta):
@@ -28,13 +28,16 @@ class GeneticAlgorithmBase(SkoBase, metaclass=ABCMeta):
 
         # constraint:
         self.has_constraint = len(constraint_eq) > 0 or len(constraint_ueq) > 0
-        self.constraint_eq = list(constraint_eq)  # a list of equal functions with ceq[i] = 0
-        self.constraint_ueq = list(constraint_ueq)  # a list of unequal constraint functions with c[i] <= 0
+        # a list of equal functions with ceq[i] = 0
+        self.constraint_eq = list(constraint_eq)
+        # a list of unequal constraint functions with c[i] <= 0
+        self.constraint_ueq = list(constraint_ueq)
 
         self.Chrom = None
         self.X = None  # shape = (size_pop, n_dim)
         self.Y_raw = None  # shape = (size_pop,) , value is f(x)
-        self.Y = None  # shape = (size_pop,) , value is f(x) + penalty for constraint
+        # shape = (size_pop,) , value is f(x) + penalty for constraint
+        self.Y = None
         self.FitV = None  # shape = (size_pop,)
 
         # self.FitV_history = []
@@ -56,8 +59,10 @@ class GeneticAlgorithmBase(SkoBase, metaclass=ABCMeta):
             self.Y = self.Y_raw
         else:
             # constraint
-            penalty_eq = np.array([np.sum(np.abs([c_i(x) for c_i in self.constraint_eq])) for x in self.X])
-            penalty_ueq = np.array([np.sum(np.abs([max(0, c_i(x)) for c_i in self.constraint_ueq])) for x in self.X])
+            penalty_eq = np.array(
+                [np.sum(np.abs([c_i(x) for c_i in self.constraint_eq])) for x in self.X])
+            penalty_ueq = np.array(
+                [np.sum(np.abs([max(0, c_i(x)) for c_i in self.constraint_ueq])) for x in self.X])
             self.Y = self.Y_raw + 1e5 * penalty_eq + 1e5 * penalty_ueq
         return self.Y
 
@@ -146,10 +151,13 @@ class GA(GeneticAlgorithmBase):
                  lb=-1, ub=1,
                  constraint_eq=tuple(), constraint_ueq=tuple(),
                  precision=1e-7):
-        super().__init__(func, n_dim, size_pop, max_iter, prob_mut, constraint_eq, constraint_ueq)
+        super().__init__(func, n_dim, size_pop, max_iter,
+                         prob_mut, constraint_eq, constraint_ueq)
 
-        self.lb, self.ub = np.array(lb) * np.ones(self.n_dim), np.array(ub) * np.ones(self.n_dim)
-        self.precision = np.array(precision) * np.ones(self.n_dim)  # works when precision is int, float, list or array
+        self.lb, self.ub = np.array(
+            lb) * np.ones(self.n_dim), np.array(ub) * np.ones(self.n_dim)
+        # works when precision is int, float, list or array
+        self.precision = np.array(precision) * np.ones(self.n_dim)
 
         # Lind is the num of genes of every variable of func（segments）
         Lind_raw = np.log2((self.ub - self.lb) / self.precision + 1)
@@ -161,9 +169,8 @@ class GA(GeneticAlgorithmBase):
         self.int_mode_ = (self.precision % 1 == 0) & (Lind_raw % 1 != 0)
         self.int_mode = np.any(self.int_mode_)
         if self.int_mode:
-            self.ub_extend = np.where(self.int_mode_
-                                      , self.lb + (np.exp2(self.Lind) - 1) * self.precision
-                                      , self.ub)
+            self.ub_extend = np.where(
+                self.int_mode_, self.lb + (np.exp2(self.Lind) - 1) * self.precision, self.ub)
 
         self.len_chrom = sum(self.Lind)
 
@@ -171,7 +178,8 @@ class GA(GeneticAlgorithmBase):
 
     def crtbp(self):
         # create the population
-        self.Chrom = np.random.randint(low=0, high=2, size=(self.size_pop, self.len_chrom))
+        self.Chrom = np.random.randint(
+            low=0, high=2, size=(self.size_pop, self.len_chrom))
         return self.Chrom
 
     def gray2rv(self, gray_code):
@@ -180,7 +188,8 @@ class GA(GeneticAlgorithmBase):
         # output is a 1-dimensional numpy array which convert every row of input into a real number.
         _, len_gray_code = gray_code.shape
         b = gray_code.cumsum(axis=1) % 2
-        mask = np.logspace(start=1, stop=len_gray_code, base=0.5, num=len_gray_code)
+        mask = np.logspace(start=1, stop=len_gray_code,
+                           base=0.5, num=len_gray_code)
         return (b * mask).sum(axis=1) / mask.sum()
 
     def chrom2x(self, Chrom):
@@ -190,7 +199,8 @@ class GA(GeneticAlgorithmBase):
             if i == 0:
                 Chrom_temp = Chrom[:, :cumsum_len_segment[0]]
             else:
-                Chrom_temp = Chrom[:, cumsum_len_segment[i - 1]:cumsum_len_segment[i]]
+                Chrom_temp = Chrom[:, cumsum_len_segment[i - 1]
+                    :cumsum_len_segment[i]]
             X[:, i] = self.gray2rv(Chrom_temp)
 
         if self.int_mode:
@@ -233,7 +243,8 @@ class GA(GeneticAlgorithmBase):
                 if i == 0:
                     Chrom_temp = Chrom[:, :cumsum_len_segment[0]]
                 else:
-                    Chrom_temp = Chrom[:, cumsum_len_segment[i - 1]:cumsum_len_segment[i]]
+                    Chrom_temp = Chrom[:, cumsum_len_segment[i - 1]
+                        :cumsum_len_segment[i]]
                 X[:, i] = self.gray2rv(Chrom_temp)
 
             if self.int_mode:
@@ -292,14 +303,14 @@ class GA_TSP(GeneticAlgorithmBase):
     ```
     """
 
-    def __init__(self, func, n_dim, crtp,size_pop=50, max_iter=200, prob_mut=0.001):
-        super().__init__(func, n_dim, size_pop=size_pop, max_iter=max_iter, prob_mut=prob_mut)
+    def __init__(self, func, n_dim, crtp, size_pop=50, max_iter=200, prob_mut=0.001):
+        super().__init__(func, n_dim, size_pop=size_pop,
+                         max_iter=max_iter, prob_mut=prob_mut)
         self.has_constraint = False
         self.len_chrom = self.n_dim
         self.no_gain_count = 0
         self.all_old_cases = []
         crtp(self)
-
 
     # def crtbp(self):
         # create the population
@@ -317,7 +328,7 @@ class GA_TSP(GeneticAlgorithmBase):
     crossover = crossover.crossover_2point
     mutation = mutation.mutation_totinfo
 
-    def run(self, target_,visited_addr,max_iter=None):
+    def run(self, target_, visited_addr, max_iter=None):
         self.max_iter = max_iter or self.max_iter
         for i in range(self.max_iter):
             Chrom_old = self.Chrom.copy()
@@ -325,7 +336,7 @@ class GA_TSP(GeneticAlgorithmBase):
             self.X = self.chrom2x(self.Chrom)
             self.Y = self.x2y()
             self.ranking()
-            #self.selection() 计算累计覆盖率这里不进行选择
+            # self.selection() 计算累计覆盖率这里不进行选择
             self.crossover()
             self.mutation()
 
@@ -337,38 +348,45 @@ class GA_TSP(GeneticAlgorithmBase):
             # selected_idx = np.argsort(self.Y)[:self.size_pop]
             # self.Chrom = self.Chrom[selected_idx, :] 同理合并上下代不进行选择，种群没有死亡一说
 
+
             # record the best ones
             generation_best_index = self.FitV.argmax()
-            self.generation_best_X.append(self.X[generation_best_index, :].copy())
+            y_data = [round(float(n), 3) for n in self.generation_best_Y]
+            with open(os.path.join(target_.target_exe_path, f"{target_.target_name}_aaa.txt"), "a+") as f:
+                f.write(
+                    str(round(float(self.Y[generation_best_index]), 3))+"\n")
+                f.close()
+            self.generation_best_X.append(
+                self.X[generation_best_index, :].copy())
             self.generation_best_Y.append(self.Y[generation_best_index])
             self.all_history_Y.append(self.Y.copy())
             self.all_history_FitV.append(self.FitV.copy())
 
-            if len(self.generation_best_Y)>1:
+            if len(self.generation_best_Y) > 1:
                 if self.generation_best_Y[-1] == self.generation_best_Y[-2]:
-                    self.no_gain_count+=1
-            print("all case legth->",len(self.Chrom))
+                    self.no_gain_count += 1
+            print("all case legth->", len(self.Chrom))
             if self.no_gain_count > 1:
                 color.error(f"at genetarion {i} GA stucked,call DSE……")
-                new_cases = DSE_totinfo.pass_cases_to_DSE_and_get_new_case_back_to_GA(self.Chrom,target_,visited_addr)
+                new_cases = DSE_totinfo.pass_cases_to_DSE_and_get_new_case_back_to_GA(
+                    self.Chrom, target_, visited_addr)
+                print("new dse cases：", new_cases)
                 if not new_cases:
                     continue
-                self.Chrom = np.concatenate([self.Chrom,np.array(new_cases)],axis=0)
+                self.Chrom = np.concatenate(
+                    [self.Chrom, np.array(new_cases)], axis=0)
                 self.no_gain_count = 0
-            
-            # add DSE to fit `checksum()` 
-            # if 32 > i > 30:
-            #     global_best_index = np.array(self.generation_best_Y).argmin()
-            #     best_x = self.generation_best_X[global_best_index]
-            #     best_x[6]=2
-            #     print(type(self.Chrom),self.Chrom)
-            #     self.Chrom = np.concatenate([self.Chrom, [best_x]],axis=0)
-            #     print(self.Chrom)
-                # exit(0)
-                # self.Chrom.append(best_x)
 
+
+            # x_data = np.linspace(1, len(y_data), len(y_data))
+
+            # import pandas as pd
+            # df = pd.DataFrame(index=x_data, data=y_data, columns=["GA+DSE"])
+            # df.to_excel(os.path.join(target_.target_exe_path,
+            #                          f"{target_.target_name}_GA——dse.xlsx"))
 
         global_best_index = np.array(self.generation_best_Y).argmin()
         self.best_x = self.generation_best_X[global_best_index]
         self.best_y = self.func(np.array([self.best_x]))
+        print(self.all_old_cases)
         return self.best_x, self.best_y

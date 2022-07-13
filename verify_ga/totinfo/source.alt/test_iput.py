@@ -1,3 +1,4 @@
+import imp
 from re import T
 import angr
 import subprocess
@@ -6,14 +7,17 @@ from angr import SimFileStream
 import claripy
 import itertools
 import logging
+from xml.dom.minidom import parse
+
+# from utils.runfile import gcovr_save_xml, parse_xml_and_get_rate
 logging.getLogger('angr.manager').setLevel(logging.INFO) #用来记录日志
 
 
 target_name = "./tot_info"
 project = angr.Project(target_name)
 
-c = claripy.BVS('c', 8)
-r = claripy.BVS('r', 8)  #  int  <-->  0~100
+# c = claripy.BVS('c', 8)
+# r = claripy.BVS('r', 8)  #  int  <-->  0~100
 
 #  claripy.BVV('#',8)
 # ,r,claripy.BVV(32,8),c,claripy.BVS("matrix",128),claripy.BVV('\n')
@@ -25,30 +29,30 @@ r = claripy.BVS('r', 8)  #  int  <-->  0~100
 # print(flag_chars1)
 # all = [claripy.BVS("argv{}".format(i),   1 * 8) for i in range(1,20)]
 # exit(0)
-flag_chars2 = [claripy.BVS('num_%d'%i, 8) for i in range(10)]
+flag_chars2 = [claripy.BVS('num_%d' % i, 8) for i in range(20)]
 # flag_chars2 = [claripy.BVV(b'4') for i in range(4)]
 
-flag_space = [claripy.BVV(b'+') for i in range(10)]
-flag_chars3 = list(itertools.chain.from_iterable(zip(flag_chars2,flag_space)))
-bytes_list = [r.concat(claripy.BVV(b'+',8),c,b'\n'),claripy.Concat(*flag_chars3+[claripy.BVV(b'\n')])]
+# flag_space = [claripy.BVV(b'+') for i in range(10)]
+# flag_chars3 = list(itertools.chain.from_iterable(zip(flag_chars2,flag_space)))
+# bytes_list = [r.concat(claripy.BVV(b'+',8),c,b'\n'),claripy.Concat(*flag_chars3+[claripy.BVV(b'\n')])]
 # flag = flag_chars1  + flag_chars2
 # flag = claripy.Concat(*all+[claripy.BVV(b'\n')])
-# flag = claripy.Concat(*flag_chars1)
+flag = claripy.Concat(*flag_chars2)
 # print(flag.ast)
 # flag = flag_chars1.concat()
 # print(type(flag))
 # exit(0)
-simFile = angr.SimPackets(name='mypackets',content=bytes_list)
-print(simFile.content)
+# simFile = angr.SimPackets(name='mypackets',content=bytes_list)
+# print(simFile.content)
 # bytes_list = [claripy.BVS('byte_%d' % i, 8) for i in range(32)]
 # bytes_ast = claripy.Concat(*bytes_list)
 initial_state = project.factory.entry_state(
-    stdin=simFile,
+    stdin=flag,
 
     )
-# for byte in bytes_list:
-#      initial_state.solver.add(byte >= 0x20)
-#      initial_state.solver.add(byte <= 0x7e)
+for byte in flag_chars2:
+    initial_state.solver.add(byte >= 0x20)
+    initial_state.solver.add(byte <= 0x7e)
 # initial_state = project.factory.entry_state(
 #     args=[target_name], 
 #     # add_options=angr.options.unicorn,
@@ -60,9 +64,9 @@ initial_state = project.factory.entry_state(
 # for k in all:
 #     initial_state.solver.add(k < 58)
 #     initial_state.solver.add(k > 47)
-initial_state.solver.add(r>48,r<58)
+# initial_state.solver.add(r>48,r<58)
 # initial_state.solver.add(r<58)
-initial_state.solver.add(c>48,c<58)
+# initial_state.solver.add(c>48,c<58)
 # initial_state.solver.add(c<58)
 
 simulation = project.factory.simgr(initial_state)
@@ -102,8 +106,21 @@ while len(simulation.stashes['active'])>0 :
     print("active length:",len(simulation.stashes['active']))
     
     for st in simulation.active:
-        print("dead state input:  ",st.posix.dumps(0))
-        print("dead state output:  ",st.posix.dumps(1))
+        print("约束长度为：", len(st.solver.constraints))
+        if len(st.solver.constraints) > 200:
+            print("削减约束")
+            for i in range((len(st.solver.constraints)//90)**2*12):
+                st.solver.constraints.pop()
+                st.solver.reload_solver()
+        ac_stdin = st.posix.dumps(0)
+        print("active state input:  ", ac_stdin)
+        ret = subprocess.run(
+            args=["./tot_info"], input=ac_stdin, stderr=subprocess.PIPE, check=False)
+        os.system("gcovr -r ./ --xml-pretty -o ./cov.xml")
+        rootNode = parse("./cov.xml").documentElement
+        covr_rate = rootNode.getAttribute("line-rate")  # 行覆盖率
+        print("cur rate:", covr_rate)
+        print("active state output:  ", st.posix.dumps(1))
         # ans = b""
         # for flaga in flag_chars1:
         # res = st.solver.eval(r,cast_to=bytes)

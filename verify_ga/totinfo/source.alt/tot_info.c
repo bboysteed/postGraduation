@@ -84,12 +84,12 @@ char *argv[];
 			for (j = 0; j < c; ++j)
 				if (scanf(" %ld", &x(i, j)) != 1)
 				{
-					printf("--->%ld",x(i, j));
+					// printf("--->%ld",x(i, j));
 					(void)fputs("* EOF in table *\n",
 								stdout);
 					return EXIT_FAILURE;
 				}else{
-					printf("--->%ld\n",x(i, j));
+					// printf("--->%ld\n",x(i, j));
 					
 				}
 		/* compute statistic */

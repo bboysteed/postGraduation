@@ -1,20 +1,10 @@
 /*
- * @Descripttion: 
- * @version: 
+ * @Descripttion:
+ * @version:
  * @Author: steed
  * @Date: 2022-05-29 13:44:37
- * @LastEditors: steed
- * @LastEditTime: 2022-05-29 13:44:37
- */
-
-
-/*
- * @Descripttion: 
- * @version: 
- * @Author: steed
- * @Date: 2022-05-28 18:23:05
- * @LastEditors: steed
- * @LastEditTime: 2022-05-28 21:49:15
+ * @LastEditors: bboysteed 18811603538@163.com
+ * @LastEditTime: 2022-06-05 11:21:28
  */
 #include <stdio.h>
 

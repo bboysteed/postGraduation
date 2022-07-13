@@ -530,8 +530,8 @@ int	argc;
 char	*argv[];
 {
 
-	printf("argv[1]->%s\n",argv[1]);
-	printf("argv[2]->%s\n",argv[2]);
+	// printf("argv[1]->%s\n",argv[1]);
+	// printf("argv[2]->%s\n",argv[2]);
    string pat, sub;
    bool result;
 

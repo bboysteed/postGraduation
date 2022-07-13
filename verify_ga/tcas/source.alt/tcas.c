@@ -72,6 +72,7 @@ bool Non_Crossing_Biased_Climb()
     upward_preferred = Inhibit_Biased_Climb() > Down_Separation;
     if (upward_preferred)
     {
+
         result = !(Own_Below_Threat()) || ((Own_Below_Threat()) && (!(Down_Separation >= ALIM())));
     }
     else
@@ -139,6 +140,10 @@ int alt_sep_test()
         else if (need_upward_RA)
         {
             printf("arrive3");
+            if (Own_Tracked_Alt == 888)
+            {
+                printf("des get here");
+            }
             alt_sep = UPWARD_RA;
         }
         else if (need_downward_RA)

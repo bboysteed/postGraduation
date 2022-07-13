@@ -11,7 +11,8 @@
         "cstdlib": "c",
         "base64.h": "c",
         "*.tlh": "cpp",
-        "*.ph": "cpp"
+        "*.ph": "cpp",
+        "ostream": "cpp"
     },
     "cmake.configureOnOpen": false
 }

@@ -1,3 +1,12 @@
+'''
+Author: bboysteed 18811603538@163.com
+Date: 2022-04-11 21:27:36
+LastEditors: bboysteed 18811603538@163.com
+LastEditTime: 2022-06-25 21:14:37
+FilePath: /mywork/postGraduation/verify_ga/tcas_sko/operators/mutation.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
+from random import random
 import numpy as np
 
 
@@ -72,10 +81,16 @@ def mutation_reverse(self):
     return self.Chrom
 
 
-def mutation_swap(self):
+def tcas(individual):
+    for i in range(individual.shape[0]):
+        individual[i] = np.random.randint(-500, 500)
+    return individual
+
+
+def mutation_tcas(self):
     for i in range(self.size_pop):
         if np.random.rand() < self.prob_mut:
-            self.Chrom[i] = swap(self.Chrom[i])
+            self.Chrom[i] = tcas(self.Chrom[i])
     return self.Chrom
 
 def mutation_mutation_real(self):

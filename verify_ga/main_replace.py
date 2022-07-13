@@ -1,5 +1,6 @@
 #!/home/steed/.virtualenvs/ga_env/bin/python
 from mimetypes import init
+import threading
 import pandas as pd
 import numpy as np
 import pyecharts.options as opts
@@ -48,6 +49,8 @@ def println(chrom):
     for item in chrom:
         print("[",",".join(["\"{}\"".format(str(i)) for i in item]),"],")
     print("]")
+
+
 # %% do GA
 def createPopulation(self):
     # 传入的参数仅仅为两个可打印的字符串，第一个表示正则的pattern，第二个表示需要替换为的字符串，
@@ -90,9 +93,39 @@ def plot_chart(x_data,y_data):
         .render(os.path.join(target.target_exe_path,f"results_{target.target_name}.html"))
     )
 
+
+rate = 0
+
+
+def marker(file_name):
+    count = 1
+    if os.path.exists(file_name):
+        os.remove(file_name)
+
+    def write_cov_rate(count):
+        count += 1
+        gcovr_save_xml(target_=target)
+        covr_rate = parse_xml_and_get_rate(target_=target)
+        global rate
+        rate = round(float(covr_rate), 3)
+        color.info(f"ticket-> rate -> {rate}")
+        with open(file_name, "a") as f:
+            f.write(str(rate)+"\n")
+            f.close()
+        if count > 300:
+            color.warning("times up!")
+            exit(0)
+        threading.Timer(interval=10, function=write_cov_rate,
+                        args=(count,)).start()
+
+    th = threading.Timer(
+        interval=10, function=write_cov_rate, args=(count,))
+    th.start()
 def main():    
 
-    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points, crtp=createPopulation, size_pop=4, max_iter=40, prob_mut=0.5)
+    marker("./replace_rate.txt")
+    ga_tsp = GA_TSP(func=get_conv_rate, n_dim=target.num_points,
+                    crtp=createPopulation, size_pop=2, max_iter=100, prob_mut=0.5)
     visited_state_addr = []
     best_points, best_distance = ga_tsp.run(target_ = target,visited_addr = visited_state_addr)
     print(best_points,best_distance)
